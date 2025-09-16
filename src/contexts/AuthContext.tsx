@@ -29,6 +29,10 @@ interface AuthContextType {
   verifyOTP: (email: string, otp: string) => Promise<void>;
   resetPasswordWithOTP: (email: string, otp: string, newPassword: string) => Promise<void>;
   resendOTP: (email: string) => Promise<void>;
+  // Registration OTP functions
+  sendRegistrationOTP: (userData: RegisterData) => Promise<void>;
+  verifyRegistrationOTP: (userData: RegisterData & { otp: string }) => Promise<void>;
+  resendRegistrationOTP: (userData: Omit<RegisterData, 'password'>) => Promise<void>;
 }
 
 interface RegisterData {
@@ -249,6 +253,72 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // Registration OTP functions
+  const sendRegistrationOTP = async (userData: RegisterData): Promise<void> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/send-registration-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send verification code');
+      }
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to send verification code');
+    }
+  };
+
+  const verifyRegistrationOTP = async (userData: RegisterData & { otp: string }): Promise<void> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-registration-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration verification failed');
+      }
+
+      // Set token and user data
+      setToken(data.token);
+      setUser(data.user);
+      localStorage.setItem('token', data.token);
+    } catch (error: any) {
+      throw new Error(error.message || 'Registration verification failed');
+    }
+  };
+
+  const resendRegistrationOTP = async (userData: Omit<RegisterData, 'password'>): Promise<void> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-registration-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to resend verification code');
+      }
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to resend verification code');
+    }
+  };
+
   const value: AuthContextType = {
     user,
     token,
@@ -261,6 +331,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     verifyOTP,
     resetPasswordWithOTP,
     resendOTP,
+    sendRegistrationOTP,
+    verifyRegistrationOTP,
+    resendRegistrationOTP,
   };
 
   return (

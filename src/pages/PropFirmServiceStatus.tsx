@@ -269,9 +269,9 @@ const PropFirmServiceStatus = () => {
           {/* Header */}
           <div className="mb-8">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               onClick={() => navigate('/prop-firm-services')}
-              className="text-white hover:bg-white/10 mb-4"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 mb-4"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Services

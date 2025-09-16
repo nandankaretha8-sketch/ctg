@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Settings, Users, Trophy, BarChart3, Shield, Home, Clock, Menu, X, Edit, Trash2, Calendar, Bell, Plus, CheckCircle, Eye, Globe, UserPlus, TrendingUp, Monitor, Smartphone, Tablet, Rocket, Star, MessageSquare, User as UserIcon, Target, Play, XCircle, Layout, DollarSign, Save, Send } from 'lucide-react';
+import { ArrowLeft, Settings, Users, Trophy, BarChart3, Shield, Home, Clock, Menu, X, Edit, Trash2, Calendar, Bell, Plus, CheckCircle, Eye, Globe, UserPlus, TrendingUp, Monitor, Smartphone, Tablet, Rocket, Star, MessageSquare, User as UserIcon, Target, Play, XCircle, Layout, DollarSign, Save, Send, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import SettingsPanel from '@/components/SettingsPanel';
@@ -179,14 +179,11 @@ const AdminPanel = () => {
   const [challenges, setChallenges] = useState<any[]>([]);
   const [challengesLoading, setChallengesLoading] = useState(false);
   const [challengeStatusFilter, setChallengeStatusFilter] = useState('all');
-  const [mt5Accounts, setMt5Accounts] = useState<any[]>([]);
-  const [mt5AccountsLoading, setMt5AccountsLoading] = useState(false);
-  const [challengeFilter, setChallengeFilter] = useState('all');
   const [users, setUsers] = useState<any[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [signalPlans, setSignalPlans] = useState<any[]>([]);
   const [signalPlansLoading, setSignalPlansLoading] = useState(false);
-  const [competitions, setCompetitions] = useState<any[]>([]);
   const [competitionsLoading, setCompetitionsLoading] = useState(false);
   const [isCreateSignalPlanModalOpen, setIsCreateSignalPlanModalOpen] = useState(false);
   const [isEditSignalPlanModalOpen, setIsEditSignalPlanModalOpen] = useState(false);
@@ -343,7 +340,6 @@ const AdminPanel = () => {
   const [sendingChatMessage, setSendingChatMessage] = useState(false);
   const [isViewUserModalOpen, setIsViewUserModalOpen] = useState(false);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [visitorStats, setVisitorStats] = useState<any>(null);
   const [visitorStatsLoading, setVisitorStatsLoading] = useState(false);
   const [dashboardStats, setDashboardStats] = useState({
@@ -408,9 +404,24 @@ const AdminPanel = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
 
+  // Leaderboard management states
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [isEditLeaderboardModalOpen, setIsEditLeaderboardModalOpen] = useState(false);
+  const [editingLeaderboardEntry, setEditingLeaderboardEntry] = useState<any>(null);
+  const [mt5UpdateLoading, setMt5UpdateLoading] = useState(false);
+  const [syncLeaderboardLoading, setSyncLeaderboardLoading] = useState(false);
+  const [competitions, setCompetitions] = useState<any[]>([]);
+  const [selectedCompetition, setSelectedCompetition] = useState<string>('');
+  const [competitionParticipants, setCompetitionParticipants] = useState<any[]>([]);
+  const [participantSearchTerm, setParticipantSearchTerm] = useState('');
+  const [isUserManagementModalOpen, setIsUserManagementModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'challenges', label: 'Competitions', icon: Trophy },
+    { id: 'leaderboard', label: 'Leaderboard Management', icon: TrendingUp },
     { id: 'signal-plans', label: 'Signal Plans', icon: Rocket },
     { id: 'mentorships', label: 'Mentorships', icon: UserIcon },
     { id: 'manage-mentorships', label: 'Manage Mentorships', icon: Users },
@@ -421,7 +432,6 @@ const AdminPanel = () => {
     { id: 'footer-settings', label: 'Footer Settings', icon: Layout },
     { id: 'support', label: 'Support Management', icon: MessageSquare },
     { id: 'users', label: 'Users', icon: Users },
-    { id: 'accounts', label: 'Accounts', icon: Shield },
     { id: 'notifications', label: 'Push Notifications', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
@@ -451,39 +461,6 @@ const AdminPanel = () => {
     }
   };
 
-  // Fetch MT5 accounts data
-  const fetchMT5Accounts = async () => {
-    try {
-      setMt5AccountsLoading(true);
-      
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-      
-      const response = await fetch('http://localhost:5000/api/challenges/admin/mt5-accounts', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`MT5 Accounts API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setMt5Accounts(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching MT5 accounts:', error);
-      toast.error('Failed to load MT5 accounts');
-    } finally {
-      setMt5AccountsLoading(false);
-    }
-  };
 
   // Fetch notifications data
   const fetchNotifications = async () => {
@@ -553,6 +530,20 @@ const AdminPanel = () => {
     }
   };
 
+  // Filter users based on search term
+  const filteredUsers = users.filter(user => {
+    if (!userSearchTerm) return true;
+    
+    const searchLower = userSearchTerm.toLowerCase();
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
+    const email = user.email?.toLowerCase() || '';
+    const role = user.role?.toLowerCase() || '';
+    
+    return fullName.includes(searchLower) || 
+           email.includes(searchLower) || 
+           role.includes(searchLower);
+  });
+
   // Fetch signal plans data
   const fetchSignalPlans = async () => {
     try {
@@ -587,17 +578,80 @@ const AdminPanel = () => {
     }
   };
 
-  // Fetch competitions data
-  const fetchCompetitions = async () => {
+
+  // Fetch leaderboard data
+  const fetchLeaderboard = async () => {
     try {
-      setCompetitionsLoading(true);
+      setLeaderboardLoading(true);
       
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
+      // Only fetch if a competition is selected
+      if (!selectedCompetition) {
+        setLeaderboard([]);
+        return;
       }
       
-      const response = await fetch('http://localhost:5000/api/challenges', {
+      const url = `http://localhost:5000/api/leaderboard?challengeId=${selectedCompetition}&limit=100&_t=${Date.now()}`;
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Leaderboard API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Frontend received leaderboard data:', data.leaderboard);
+        if (data.leaderboard.length > 0) {
+          console.log('First entry keys:', Object.keys(data.leaderboard[0]));
+          console.log('First entry participantId:', data.leaderboard[0].participantId);
+        }
+        setLeaderboard(data.leaderboard);
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      toast.error('Failed to load leaderboard');
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  };
+
+  // Fetch competitions
+  const fetchCompetitions = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/challenges');
+      
+      if (!response.ok) {
+        throw new Error(`Competitions API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        const competitionsData = data.data || [];
+        setCompetitions(competitionsData);
+        
+        // Set first competition as default if none selected
+        if (competitionsData.length > 0 && !selectedCompetition) {
+          setSelectedCompetition(competitionsData[0]._id);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching competitions:', error);
+      toast.error('Failed to load competitions');
+    }
+  };
+
+  // Fetch competition participants
+  const fetchCompetitionParticipants = async (competitionId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Authentication required');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/challenges/${competitionId}/participants`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -605,19 +659,225 @@ const AdminPanel = () => {
       });
       
       if (!response.ok) {
-        throw new Error(`Competitions API error: ${response.status}`);
+        throw new Error(`Participants API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setCompetitionParticipants(data.participants || []);
+      }
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+      toast.error('Failed to load participants');
+    }
+  };
+
+  // Filter participants based on search term
+  const filteredParticipants = competitionParticipants.filter(participant => {
+    if (!participantSearchTerm) return true;
+    
+    const searchLower = participantSearchTerm.toLowerCase();
+    const fullName = `${participant.user?.firstName || ''} ${participant.user?.lastName || ''}`.toLowerCase();
+    const email = participant.user?.email?.toLowerCase() || '';
+    const username = participant.user?.username?.toLowerCase() || '';
+    const accountId = participant.mt5Account?.id?.toLowerCase() || '';
+    
+    return fullName.includes(searchLower) || 
+           email.includes(searchLower) || 
+           username.includes(searchLower) ||
+           accountId.includes(searchLower);
+  });
+
+  // Manual MT5 update
+  const triggerMT5Update = async () => {
+    try {
+      setMt5UpdateLoading(true);
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      const response = await fetch('http://localhost:5000/api/leaderboard/update-mt5', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`MT5 update API error: ${response.status}`);
       }
       
       const data = await response.json();
       
       if (data.success) {
-        setCompetitions(data.data);
+        toast.success('MT5 data updated successfully');
+        // Refresh leaderboard after update
+        await fetchLeaderboard();
       }
     } catch (error) {
-      console.error('Error fetching competitions:', error);
-      toast.error('Failed to load competitions');
+      console.error('Error updating MT5 data:', error);
+      toast.error('Failed to update MT5 data');
     } finally {
-      setCompetitionsLoading(false);
+      setMt5UpdateLoading(false);
+    }
+  };
+
+  // Sync leaderboard with participant data
+  const syncLeaderboard = async () => {
+    try {
+      setSyncLeaderboardLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('http://localhost:5000/api/challenges/admin/sync-leaderboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(`Leaderboard synced successfully! ${data.syncedCount} participants updated.`);
+        // Refresh leaderboard after sync
+        await fetchLeaderboard();
+      }
+    } catch (error) {
+      console.error('Error syncing leaderboard:', error);
+      toast.error('Failed to sync leaderboard');
+    } finally {
+      setSyncLeaderboardLoading(false);
+    }
+  };
+
+  // Update leaderboard entry
+  const updateLeaderboardEntry = async (entryId: string, updatedData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Check if this is a challenge-specific entry (no _id field) or a global leaderboard entry
+      if (!entryId || entryId === 'undefined') {
+        // This is a challenge-specific entry, update the participant data instead
+        console.log('Update debug - selectedCompetition:', selectedCompetition);
+        console.log('Update debug - updatedData.participantId:', updatedData.participantId);
+        console.log('Update debug - updatedData:', updatedData);
+        
+        // If participantId is missing, try to find it from the current leaderboard state
+        let participantId = updatedData.participantId;
+        if (!participantId) {
+          console.log('ParticipantId missing, searching in current leaderboard...');
+          const currentEntry = leaderboard.find(lb => lb.userId === updatedData.userId);
+          if (currentEntry && currentEntry.participantId) {
+            participantId = currentEntry.participantId;
+            console.log('Found participantId from leaderboard:', participantId);
+          }
+        }
+        
+        if (!selectedCompetition || !participantId) {
+          throw new Error('Missing competition or participant information');
+        }
+
+        const response = await fetch(`http://localhost:5000/api/challenges/${selectedCompetition}/participants/${participantId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            currentBalance: updatedData.balance,
+            profit: updatedData.profit,
+            profitPercent: updatedData.profitPercent,
+            status: 'active' // Keep status as active when updating
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Update participant API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          toast.success('Participant data updated successfully');
+          await fetchLeaderboard();
+          await fetchCompetitionParticipants(selectedCompetition);
+          setIsEditLeaderboardModalOpen(false);
+          setEditingLeaderboardEntry(null);
+        } else {
+          throw new Error(data.message || 'Failed to update participant');
+        }
+      } else {
+        // This is a global leaderboard entry, update via leaderboard API
+        const response = await fetch(`http://localhost:5000/api/leaderboard/${entryId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedData)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Update API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          toast.success('Leaderboard entry updated successfully');
+          await fetchLeaderboard();
+          setIsEditLeaderboardModalOpen(false);
+          setEditingLeaderboardEntry(null);
+        } else {
+          throw new Error(data.message || 'Failed to update leaderboard entry');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating leaderboard entry:', error);
+      toast.error('Failed to update leaderboard entry');
+    }
+  };
+
+  // Delete leaderboard entry
+  const deleteLeaderboardEntry = async (entryId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`http://localhost:5000/api/leaderboard/${entryId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Delete API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success('Leaderboard entry deleted successfully');
+        await fetchLeaderboard();
+      }
+    } catch (error) {
+      console.error('Error deleting leaderboard entry:', error);
+      toast.error('Failed to delete leaderboard entry');
     }
   };
 
@@ -1511,13 +1771,6 @@ const AdminPanel = () => {
     }
   }, [activeMenu]);
 
-  // Fetch MT5 accounts when accounts menu is active
-  useEffect(() => {
-    if (activeMenu === 'accounts') {
-      fetchMT5Accounts();
-    }
-  }, [activeMenu]);
-
   // Fetch notifications when notifications menu is active
   useEffect(() => {
     if (activeMenu === 'notifications') {
@@ -1570,6 +1823,22 @@ const AdminPanel = () => {
       fetchVisitorStats();
     }
   }, [activeMenu]);
+
+  // Fetch leaderboard when leaderboard menu is active
+  useEffect(() => {
+    if (activeMenu === 'leaderboard') {
+      fetchCompetitions();
+      fetchLeaderboard();
+    }
+  }, [activeMenu]);
+
+  // Fetch leaderboard when competition selection changes
+  useEffect(() => {
+    if (activeMenu === 'leaderboard' && selectedCompetition) {
+      fetchLeaderboard();
+      fetchCompetitionParticipants(selectedCompetition);
+    }
+  }, [selectedCompetition]);
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -3471,14 +3740,637 @@ const AdminPanel = () => {
             </div>
           </div>
         );
+
+      case 'leaderboard':
+        return (
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">Leaderboard Management</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Manage and track trading leaderboard</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={triggerMT5Update}
+                  disabled={mt5UpdateLoading}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs sm:text-sm px-2 sm:px-3"
+                >
+                  {mt5UpdateLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white mr-1 sm:mr-2"></div>
+                      <span className="hidden sm:inline">Updating...</span>
+                      <span className="sm:hidden">...</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Update MT5 Data</span>
+                      <span className="sm:hidden">Update</span>
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={syncLeaderboard}
+                  disabled={syncLeaderboardLoading}
+                  size="sm"
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs sm:text-sm px-2 sm:px-3"
+                >
+                  {syncLeaderboardLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white mr-1 sm:mr-2"></div>
+                      <span className="hidden sm:inline">Syncing...</span>
+                      <span className="sm:hidden">...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Sync Leaderboard</span>
+                      <span className="sm:hidden">Sync</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Help Section */}
+            <Card className="bg-blue-500/10 backdrop-blur-md border-blue-500/20">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-sm sm:text-base mb-1">How to Use This System</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">
+                      • <strong>Select a competition</strong> to view its leaderboard and participants<br/>
+                      • <strong>Update MT5 Data</strong> to sync live trading data<br/>
+                      • <strong>Manage participants</strong> by clicking "Manage" to update balances, profits, and status<br/>
+                      • <strong>Default balance</strong> is set to competition account size<br/>
+                      • <strong>Profit starts at $0</strong> for new participants
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Competition Filter */}
+            <Card className="bg-white/5 backdrop-blur-md border-white/10">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  <Label className="text-white font-semibold text-sm sm:text-base">Filter by Competition:</Label>
+                  <Select value={selectedCompetition} onValueChange={setSelectedCompetition}>
+                    <SelectTrigger className="w-full sm:w-64 bg-white/10 border-white/20 text-white">
+                      <SelectValue placeholder="Select competition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {competitions.map((competition) => (
+                        <SelectItem key={competition._id} value={competition._id}>
+                          {competition.name} ({competition.currentParticipants}/{competition.maxParticipants})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Leaderboard Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 mx-auto mb-1 sm:mb-2" />
+                  <h3 className="text-lg sm:text-2xl font-bold text-white">{leaderboard.length}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Total Entries</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-400 mx-auto mb-1 sm:mb-2" />
+                  <h3 className="text-lg sm:text-2xl font-bold text-white">
+                    {leaderboard.length > 0 ? leaderboard[0]?.profitPercent?.toFixed(2) + '%' : '0%'}
+                  </h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Top Performance</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 mx-auto mb-1 sm:mb-2" />
+                  <h3 className="text-lg sm:text-2xl font-bold text-white">
+                    ${leaderboard.length > 0 ? leaderboard[0]?.balance?.toLocaleString() : '0'}
+                  </h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Highest Balance</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400 mx-auto mb-1 sm:mb-2" />
+                  <h3 className="text-lg sm:text-2xl font-bold text-white">
+                    {leaderboard.filter(entry => entry.profit > 0).length}
+                  </h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Profitable Traders</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Leaderboard Table */}
+            <Card className="bg-white/5 backdrop-blur-md border-white/10">
+              <CardHeader className="p-3 sm:p-6">
+                <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Trading Leaderboard
+                </CardTitle>
+                <CardDescription className="text-gray-300 text-sm sm:text-base">
+                  Real-time trading performance rankings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-6">
+                {leaderboardLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-16 bg-gray-600 rounded-lg"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : leaderboard.length > 0 ? (
+                  <div className="space-y-3">
+                    {leaderboard.map((entry, index) => (
+                      <div
+                        key={entry._id}
+                        className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg gap-3 ${
+                          index < 3 
+                            ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30' 
+                            : 'bg-white/5 border border-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full font-bold text-xs sm:text-sm ${
+                            index === 0 ? 'bg-yellow-500 text-black' :
+                            index === 1 ? 'bg-gray-400 text-black' :
+                            index === 2 ? 'bg-amber-600 text-white' :
+                            'bg-purple-600 text-white'
+                          }`}>
+                            {index + 1}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-white font-semibold text-sm sm:text-base truncate">
+                              {entry.firstName} {entry.lastName}
+                            </div>
+                            <div className="text-gray-400 text-xs sm:text-sm truncate">@{entry.username}</div>
+                            <div className="text-gray-500 text-xs truncate">Account: {entry.accountId}</div>
+                            {entry.mt5Account && (
+                              <div className="text-gray-500 text-xs truncate">
+                                MT5: {entry.mt5Account.id} ({entry.mt5Account.server || 'No Server'})
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mt-3 sm:mt-0">
+                          <div className="flex items-center gap-2 sm:gap-6">
+                            <div className="text-right">
+                              <div className="text-white font-semibold text-sm sm:text-base">
+                                ${entry.balance?.toLocaleString()}
+                              </div>
+                              <div className="text-gray-400 text-xs sm:text-sm">Balance</div>
+                            </div>
+                            <div className="text-right">
+                              <div className={`font-semibold text-sm sm:text-base ${
+                                entry.profit >= 0 ? 'text-green-400' : 'text-red-400'
+                              }`}>
+                                ${entry.profit?.toLocaleString()}
+                              </div>
+                              <div className="text-gray-400 text-xs sm:text-sm">Profit</div>
+                            </div>
+                            <div className="text-right hidden sm:block">
+                              <div className={`font-semibold ${
+                                entry.profitPercent >= 0 ? 'text-green-400' : 'text-red-400'
+                              }`}>
+                                {entry.profitPercent?.toFixed(2)}%
+                              </div>
+                              <div className="text-gray-400 text-sm">Performance</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={async () => {
+                                // Add a temporary _id field for challenge-specific entries
+                                console.log('Edit button clicked - entry:', entry);
+                                console.log('Edit button clicked - selectedCompetition:', selectedCompetition);
+                                
+                                console.log('Edit button clicked - entry object:', entry);
+                                console.log('Edit button clicked - entry.participantId:', entry.participantId);
+                                console.log('Edit button clicked - entry keys:', Object.keys(entry));
+                                
+                                // If participantId is missing, refresh the leaderboard data
+                                if (!entry.participantId) {
+                                  console.log('ParticipantId missing, refreshing leaderboard data...');
+                                  await fetchLeaderboard();
+                                  // Wait a bit for the state to update
+                                  setTimeout(() => {
+                                    // Find the updated entry with participantId
+                                    const updatedEntry = leaderboard.find(lb => lb.userId === entry.userId);
+                                    if (updatedEntry && updatedEntry.participantId) {
+                                      console.log('Found updated entry with participantId:', updatedEntry.participantId);
+                                      const entryWithId = {
+                                        ...updatedEntry,
+                                        _id: updatedEntry._id || 'undefined' // Don't use participantId as _id
+                                      };
+                                      setEditingLeaderboardEntry(entryWithId);
+                                      setIsEditLeaderboardModalOpen(true);
+                                    } else {
+                                      console.log('Still no participantId found, using original entry');
+                                      const entryWithId = {
+                                        ...entry,
+                                        _id: entry._id || 'undefined' // Don't use participantId as _id
+                                      };
+                                      setEditingLeaderboardEntry(entryWithId);
+                                      setIsEditLeaderboardModalOpen(true);
+                                    }
+                                  }, 100);
+                                } else {
+                                  const entryWithId = {
+                                    ...entry,
+                                    _id: entry._id || 'undefined' // Don't use participantId as _id
+                                  };
+                                  console.log('Edit button clicked - entryWithId:', entryWithId);
+                                  setEditingLeaderboardEntry(entryWithId);
+                                  setIsEditLeaderboardModalOpen(true);
+                                }
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 p-1 sm:p-2"
+                            >
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this leaderboard entry?')) {
+                                  deleteLeaderboardEntry(entry._id);
+                                }
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="bg-red-500/20 border-red-500/30 text-red-300 hover:bg-red-500/30 p-1 sm:p-2"
+                            >
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-400 mb-4">No leaderboard entries found</p>
+                    <Button
+                      onClick={triggerMT5Update}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600"
+                    >
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Update MT5 Data
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* All Participants Management */}
+            <Card className="bg-white/5 backdrop-blur-md border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Competition Participants
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  Manage participants for the selected competition
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {selectedCompetition && competitions.length > 0 ? (
+                  (() => {
+                    const competition = competitions.find(c => c._id === selectedCompetition);
+                    return competition ? (
+                      <div className="border border-white/10 rounded-lg p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-white font-semibold text-sm sm:text-base truncate">{competition.name}</h4>
+                            <p className="text-gray-400 text-xs sm:text-sm">
+                              {competition.currentParticipants}/{competition.maxParticipants} participants • 
+                              ${competition.accountSize.toLocaleString()} account size
+                            </p>
+                          </div>
+                          <Badge className={`${
+                            competition.status === 'active' ? 'bg-green-500' : 
+                            competition.status === 'upcoming' ? 'bg-yellow-500' : 
+                            'bg-gray-500'
+                          } text-white text-xs sm:text-sm self-start sm:self-center`}>
+                            {competition.status}
+                          </Badge>
+                        </div>
+                        
+                        {/* Search Participants */}
+                        {competition.participants && competition.participants.length > 0 && (
+                          <div className="mb-4">
+                            <div className="flex flex-col sm:flex-row gap-3 items-center">
+                              <div className="flex-1 w-full">
+                                <Label htmlFor="participant-search" className="text-white text-sm font-medium mb-2 block">
+                                  Search Participants
+                                </Label>
+                                <div className="relative">
+                                  <Input
+                                    id="participant-search"
+                                    type="text"
+                                    placeholder="Search by name, email, username, or MT5 account..."
+                                    value={participantSearchTerm}
+                                    onChange={(e) => setParticipantSearchTerm(e.target.value)}
+                                    className="bg-white/10 border-white/20 text-white placeholder-gray-400 focus:border-white/40 focus:ring-white/20 pl-10"
+                                  />
+                                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                </div>
+                              </div>
+                              {participantSearchTerm && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setParticipantSearchTerm('')}
+                                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                                >
+                                  Clear
+                                </Button>
+                              )}
+                            </div>
+                            {participantSearchTerm && (
+                              <p className="text-gray-400 text-sm mt-2">
+                                Found {competition.participants.filter(participant => {
+                                  const searchLower = participantSearchTerm.toLowerCase();
+                                  const fullName = `${participant.user?.firstName || ''} ${participant.user?.lastName || ''}`.toLowerCase();
+                                  const email = participant.user?.email?.toLowerCase() || '';
+                                  const username = participant.user?.username?.toLowerCase() || '';
+                                  const accountId = participant.mt5Account?.id?.toLowerCase() || '';
+                                  
+                                  return fullName.includes(searchLower) || 
+                                         email.includes(searchLower) || 
+                                         username.includes(searchLower) ||
+                                         accountId.includes(searchLower);
+                                }).length} participant{competition.participants.filter(participant => {
+                                  const searchLower = participantSearchTerm.toLowerCase();
+                                  const fullName = `${participant.user?.firstName || ''} ${participant.user?.lastName || ''}`.toLowerCase();
+                                  const email = participant.user?.email?.toLowerCase() || '';
+                                  const username = participant.user?.username?.toLowerCase() || '';
+                                  const accountId = participant.mt5Account?.id?.toLowerCase() || '';
+                                  
+                                  return fullName.includes(searchLower) || 
+                                         email.includes(searchLower) || 
+                                         username.includes(searchLower) ||
+                                         accountId.includes(searchLower);
+                                }).length !== 1 ? 's' : ''} matching "{participantSearchTerm}"
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
+                        {competition.participants && competition.participants.length > 0 ? (
+                          (() => {
+                            const filteredCompetitionParticipants = competition.participants.filter(participant => {
+                              if (!participantSearchTerm) return true;
+                              
+                              const searchLower = participantSearchTerm.toLowerCase();
+                              const fullName = `${participant.user?.firstName || ''} ${participant.user?.lastName || ''}`.toLowerCase();
+                              const email = participant.user?.email?.toLowerCase() || '';
+                              const username = participant.user?.username?.toLowerCase() || '';
+                              const accountId = participant.mt5Account?.id?.toLowerCase() || '';
+                              
+                              return fullName.includes(searchLower) || 
+                                     email.includes(searchLower) || 
+                                     username.includes(searchLower) ||
+                                     accountId.includes(searchLower);
+                            });
+
+                            return filteredCompetitionParticipants.length > 0 ? (
+                              <div className="space-y-2">
+                                {filteredCompetitionParticipants.map((participant) => (
+                              <div
+                                key={participant._id}
+                                className="flex flex-col p-3 rounded-lg bg-white/5 border border-white/10 gap-3"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm">
+                                    {participant.user?.firstName?.charAt(0) || 'U'}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="text-white font-medium text-sm truncate">
+                                      {participant.user?.firstName} {participant.user?.lastName}
+                                    </div>
+                                    <div className="text-gray-400 text-xs truncate">@{participant.user?.username}</div>
+                                    {participant.mt5Account?.id && (
+                                      <div className="text-gray-500 text-xs truncate">
+                                        MT5: {participant.mt5Account.id} ({participant.mt5Account.server || 'No Server'})
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                  {/* Financial Info - Stack on mobile, side by side on desktop */}
+                                  <div className="flex items-center gap-3 sm:gap-4">
+                                    <div className="text-right">
+                                      <div className="text-white font-semibold text-xs sm:text-sm">
+                                        ${participant.currentBalance?.toLocaleString() || competition.accountSize?.toLocaleString() || '0'}
+                                      </div>
+                                      <div className="text-gray-400 text-xs">Balance</div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className={`font-semibold text-xs sm:text-sm ${
+                                        (participant.profit || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                                      }`}>
+                                        ${participant.profit?.toLocaleString() || '0'}
+                                      </div>
+                                      <div className="text-gray-400 text-xs">Profit</div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Status and Actions - Stack on mobile, side by side on desktop */}
+                                  <div className="flex items-center justify-between sm:justify-end gap-2">
+                                    <Badge className={`text-xs ${
+                                      participant.status === 'active' ? 'bg-green-500' :
+                                      participant.status === 'pending_setup' ? 'bg-yellow-500' :
+                                      participant.status === 'completed' ? 'bg-blue-500' :
+                                      'bg-red-500'
+                                    } text-white flex-shrink-0`}>
+                                      {participant.status}
+                                    </Badge>
+                                    <Button
+                                      onClick={() => {
+                                        setSelectedUser({
+                                          ...participant,
+                                          competitionId: competition._id,
+                                          competitionName: competition.name,
+                                          // Set better defaults
+                                          currentBalance: participant.currentBalance || competition.accountSize,
+                                          profit: participant.profit || 0,
+                                          profitPercent: participant.profitPercent || 0,
+                                          status: participant.status || 'pending_setup',
+                                          mt5Account: participant.mt5Account || { id: '', server: '', password: '' }
+                                        });
+                                        setIsUserManagementModalOpen(true);
+                                      }}
+                                      size="sm"
+                                      variant="outline"
+                                      className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400/40 text-purple-300 hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-400/60 hover:text-purple-200 transition-all duration-200 text-xs px-3 py-1.5 rounded-lg shadow-sm hover:shadow-md flex-shrink-0"
+                                    >
+                                      <Edit className="h-3 w-3 sm:mr-1" />
+                                      <span className="hidden sm:inline">Manage</span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-4">
+                                <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                <h3 className="text-white font-semibold mb-2">No Participants Found</h3>
+                                <p className="text-gray-400 text-sm">
+                                  {participantSearchTerm 
+                                    ? `No participants match your search for "${participantSearchTerm}"`
+                                    : 'No participants found for this competition.'
+                                  }
+                                </p>
+                                {participantSearchTerm && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setParticipantSearchTerm('')}
+                                    className="mt-3 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                                  >
+                                    Clear Search
+                                  </Button>
+                                )}
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className="text-center py-4">
+                            <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-gray-400 text-sm">No participants yet</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-4">Selected competition not found</p>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <div className="text-center py-8">
+                    <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-400 mb-4">Please select a competition to view participants</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Competition Participants Management - Removed since participants are now shown above */}
+            {false && selectedCompetition !== 'all' && competitionParticipants.length > 0 && (
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Competition Participants
+                  </CardTitle>
+                  <CardDescription className="text-gray-300">
+                    Manage participants for selected competition
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {competitionParticipants.map((participant) => (
+                      <div
+                        key={participant._id}
+                        className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {participant.user?.firstName?.charAt(0) || 'U'}
+                          </div>
+                          <div>
+                            <div className="text-white font-semibold">
+                              {participant.user?.firstName} {participant.user?.lastName}
+                            </div>
+                            <div className="text-gray-400 text-sm">@{participant.user?.username}</div>
+                            <div className="text-gray-500 text-xs">
+                              Status: <span className={`${
+                                participant.status === 'active' ? 'text-green-400' :
+                                participant.status === 'pending_setup' ? 'text-yellow-400' :
+                                participant.status === 'completed' ? 'text-blue-400' :
+                                'text-red-400'
+                              }`}>{participant.status}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <div className="text-white font-semibold">
+                              ${participant.currentBalance?.toLocaleString() || '0'}
+                            </div>
+                            <div className="text-gray-400 text-sm">Current Balance</div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`font-semibold ${
+                              (participant.profit || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              ${participant.profit?.toLocaleString() || '0'}
+                            </div>
+                            <div className="text-gray-400 text-sm">Profit</div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => {
+                                const competition = competitions.find(c => c._id === selectedCompetition);
+                                setSelectedUser({
+                                  ...participant,
+                                  competitionId: competition?._id,
+                                  competitionName: competition?.name,
+                                  currentBalance: participant.currentBalance || competition?.accountSize,
+                                  profit: participant.profit || 0,
+                                  profitPercent: participant.profitPercent || 0,
+                                  status: participant.status || 'pending_setup',
+                                  mt5Account: participant.mt5Account || { id: '', server: '', password: '' }
+                                });
+                                setIsUserManagementModalOpen(true);
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Manage
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
         
       case 'signal-plans':
         return (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Signal Plans Management</h2>
-                <p className="text-gray-300">Manage signal plan subscriptions and pricing</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Signal Plans Management</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Manage signal plan subscriptions and pricing</p>
               </div>
               <Button
                 onClick={() => {
@@ -3499,10 +4391,11 @@ const AdminPanel = () => {
                   });
                   setIsCreateSignalPlanModalOpen(true);
                 }}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm sm:text-base px-3 sm:px-4 py-2 w-full sm:w-auto"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Plan
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Create New Plan</span>
+                <span className="sm:hidden">New Plan</span>
               </Button>
             </div>
             
@@ -3645,10 +4538,10 @@ const AdminPanel = () => {
       case 'mentorships':
         return (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Mentorship Plans Management</h2>
-                <p className="text-gray-300">Manage mentorship programs and subscriptions</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Mentorship Plans Management</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Manage mentorship programs and subscriptions</p>
               </div>
               <Button
                 onClick={() => {
@@ -3675,10 +4568,11 @@ const AdminPanel = () => {
                   });
                   setIsCreateMentorshipPlanModalOpen(true);
                 }}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm sm:text-base px-3 sm:px-4 py-2 w-full sm:w-auto"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Plan
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Create New Plan</span>
+                <span className="sm:hidden">New Plan</span>
               </Button>
             </div>
             
@@ -3961,7 +4855,7 @@ const AdminPanel = () => {
                               (() => {
                                 const nextSession = subscription.sessionHistory
                                   .filter(session => session.status === 'scheduled')
-                                  .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+                                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
                                 return nextSession && (
                                   <span className="text-gray-500 ml-1">({nextSession.timezone || 'UTC'})</span>
                                 );
@@ -4005,10 +4899,10 @@ const AdminPanel = () => {
       case 'youtube-videos':
         return (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">YouTube Videos Management</h2>
-                <p className="text-gray-300">Manage YouTube videos for the home page carousel</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">YouTube Videos Management</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Manage YouTube videos for the home page carousel</p>
               </div>
               <Button
                 onClick={() => {
@@ -4021,10 +4915,11 @@ const AdminPanel = () => {
                   });
                   setIsCreateYouTubeVideoModalOpen(true);
                 }}
-                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white"
+                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white text-sm sm:text-base px-3 sm:px-4 py-2 w-full sm:w-auto"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Video
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Add Video</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </div>
             
@@ -4185,10 +5080,10 @@ const AdminPanel = () => {
       case 'prop-firm-packages':
         return (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Prop Firm Packages</h2>
-                <p className="text-gray-300">Manage prop firm account management packages</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Prop Firm Packages</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Manage prop firm account management packages</p>
               </div>
               <Button
                 onClick={() => {
@@ -4214,10 +5109,11 @@ const AdminPanel = () => {
                   });
                   setIsCreatePropFirmPackageModalOpen(true);
                 }}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-sm sm:text-base px-3 sm:px-4 py-2 w-full sm:w-auto"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Package
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Create Package</span>
+                <span className="sm:hidden">New Package</span>
               </Button>
             </div>
             
@@ -4486,17 +5382,18 @@ const AdminPanel = () => {
       case 'footer-settings':
         return (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Footer Settings</h2>
-                <p className="text-gray-300">Manage footer content, contact information, and social media links</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Footer Settings</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Manage footer content, contact information, and social media links</p>
               </div>
               <Button
                 onClick={() => setIsFooterSettingsModalOpen(true)}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm sm:text-base px-3 sm:px-4 py-2 w-full sm:w-auto"
               >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Settings
+                <Edit className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Edit Settings</span>
+                <span className="sm:hidden">Edit</span>
               </Button>
             </div>
             
@@ -4957,6 +5854,45 @@ const AdminPanel = () => {
               <p className="text-gray-300">Manage platform users and their accounts</p>
             </div>
             
+            {/* Search Users */}
+            <Card className="bg-white/5 backdrop-blur-md border-white/10">
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  <div className="flex-1 w-full">
+                    <Label htmlFor="user-search" className="text-white text-sm font-medium mb-2 block">
+                      Search Users
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="user-search"
+                        type="text"
+                        placeholder="Search by name, email, or role..."
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        className="bg-white/10 border-white/20 text-white placeholder-gray-400 focus:border-white/40 focus:ring-white/20 pl-10"
+                      />
+                      <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+                  {userSearchTerm && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUserSearchTerm('')}
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+                {userSearchTerm && (
+                  <p className="text-gray-400 text-sm mt-2">
+                    Found {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} matching "{userSearchTerm}"
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+            
             {/* Users Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="bg-white/5 backdrop-blur-md border-white/10">
@@ -5014,34 +5950,51 @@ const AdminPanel = () => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
                     <p className="text-gray-400 mt-2">Loading users...</p>
                   </div>
-                ) : users.length === 0 ? (
+                ) : filteredUsers.length === 0 ? (
                   <div className="text-center py-8">
                     <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-300 mb-2">No Users Found</h3>
-                    <p className="text-gray-400">No users have registered on the platform yet.</p>
+                    <h3 className="text-xl font-semibold text-gray-300 mb-2">
+                      {userSearchTerm ? 'No Users Found' : 'No Users Found'}
+                    </h3>
+                    <p className="text-gray-400">
+                      {userSearchTerm 
+                        ? `No users match your search for "${userSearchTerm}"`
+                        : 'No users have registered on the platform yet.'
+                      }
+                    </p>
+                    {userSearchTerm && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setUserSearchTerm('')}
+                        className="mt-4 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                      >
+                        Clear Search
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {users.map((user) => (
+                    {filteredUsers.map((user) => (
                       <div
                         key={user._id}
-                        className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white/5 rounded-lg border border-white/10 gap-4"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center flex-shrink-0">
                             <span className="text-white font-semibold text-sm">
                               {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
                             </span>
                           </div>
-                          <div>
-                            <h3 className="text-white font-semibold">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-white font-semibold truncate">
                               {user.firstName && user.lastName 
                                 ? `${user.firstName} ${user.lastName}` 
                                 : user.email
                               }
                             </h3>
-                            <p className="text-gray-400 text-sm">{user.email}</p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <p className="text-gray-400 text-sm truncate">{user.email}</p>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <Badge 
                                 variant="outline" 
                                 className={`text-xs ${
@@ -5061,8 +6014,8 @@ const AdminPanel = () => {
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                          <div className="text-right">
+                        <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-2 flex-shrink-0">
+                          <div className="text-left sm:text-right">
                             <p className="text-gray-400 text-xs">Joined</p>
                             <p className="text-white text-sm">
                               {new Date(user.createdAt).toLocaleDateString()}
@@ -5073,7 +6026,7 @@ const AdminPanel = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleViewUser(user)}
-                              className="text-gray-400 hover:text-white hover:bg-white/10"
+                              className="text-gray-400 hover:text-white hover:bg-white/10 p-2"
                               title="View Details"
                             >
                               <Eye className="h-4 w-4" />
@@ -5082,7 +6035,7 @@ const AdminPanel = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditUser(user)}
-                              className="text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
+                              className="text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 p-2"
                               title="Edit User"
                             >
                               <Edit className="h-4 w-4" />
@@ -5095,133 +6048,6 @@ const AdminPanel = () => {
                 )}
               </CardContent>
             </Card>
-          </div>
-        );
-        
-      case 'accounts':
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">MT5 Account Management</h2>
-              <p className="text-gray-300">Manage trading accounts and MT5 connections</p>
-            </div>
-            
-            {/* Challenge Filter */}
-            <div className="mb-6">
-              <div className="flex items-center gap-4">
-                <Label htmlFor="challenge-filter" className="text-white font-medium">
-                  Filter by Challenge:
-                </Label>
-                <Select value={challengeFilter} onValueChange={setChallengeFilter}>
-                  <SelectTrigger className="w-64 bg-white/10 border-white/20 text-white">
-                    <SelectValue placeholder="Select challenge" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    <SelectItem value="all" className="text-white hover:bg-gray-700">
-                      All Challenges
-                    </SelectItem>
-                    {Array.from(new Set(mt5Accounts.map(account => account.challengeName))).map((challengeName) => (
-                      <SelectItem key={challengeName} value={challengeName} className="text-white hover:bg-gray-700">
-                        {challengeName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            {mt5AccountsLoading ? (
-              <Card className="bg-white/5 backdrop-blur-md border-white/10">
-                <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-                    <p className="text-gray-400">Loading MT5 accounts...</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : mt5Accounts.length === 0 ? (
-            <Card className="bg-white/5 backdrop-blur-md border-white/10">
-              <CardContent className="p-6">
-                <div className="text-center py-12">
-                  <Shield className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-300 mb-2">No MT5 Accounts</h3>
-                    <p className="text-gray-400">No users have joined challenges with MT5 accounts yet.</p>
-                </div>
-              </CardContent>
-            </Card>
-            ) : (
-              <div className="space-y-4">
-                {/* Filter Results Count */}
-                <div className="text-center">
-                  <p className="text-gray-300">
-                    Showing {mt5Accounts.filter(account => 
-                      challengeFilter === 'all' || account.challengeName === challengeFilter
-                    ).length} of {mt5Accounts.length} accounts
-                    {challengeFilter !== 'all' && ` for "${challengeFilter}"`}
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-6">
-                  {mt5Accounts
-                    .filter(account => 
-                      challengeFilter === 'all' || account.challengeName === challengeFilter
-                    )
-                    .map((account) => (
-                  <Card key={account._id} className="bg-white/5 backdrop-blur-md border-white/10">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="text-white text-lg">{account.userName}</CardTitle>
-                          <CardDescription className="text-gray-300">{account.userEmail}</CardDescription>
-                        </div>
-                        <Badge 
-                          variant="outline" 
-                          className={`${
-                            account.status === 'active' 
-                              ? 'text-green-400 border-green-400' 
-                              : account.status === 'completed'
-                              ? 'text-gray-400 border-gray-400'
-                              : 'text-blue-400 border-blue-400'
-                          }`}
-                        >
-                          {account.status.charAt(0).toUpperCase() + account.status.slice(1)}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h4 className="text-white font-semibold mb-2">Challenge Details</h4>
-                          <div className="space-y-1">
-                            <p className="text-gray-300 text-sm">
-                              <span className="text-gray-400">Challenge:</span> {account.challengeName}
-                            </p>
-                            <p className="text-gray-300 text-sm">
-                              <span className="text-gray-400">Joined:</span> {new Date(account.joinedAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="text-white font-semibold mb-2">MT5 Account</h4>
-                          <div className="space-y-1">
-                            <p className="text-gray-300 text-sm">
-                              <span className="text-gray-400">Account ID:</span> {account.mt5Account.id}
-                            </p>
-                            <p className="text-gray-300 text-sm">
-                              <span className="text-gray-400">Server:</span> {account.mt5Account.server}
-                            </p>
-                            <p className="text-gray-300 text-sm">
-                              <span className="text-gray-400">Password:</span> {account.mt5Account.password}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                </div>
-              </div>
-            )}
           </div>
         );
         
@@ -9088,7 +9914,7 @@ const AdminPanel = () => {
               <div className="space-y-4">
                 {selectedMentorshipSubscription.sessionHistory
                   ?.filter(session => session.status === 'scheduled')
-                  .sort((a, b) => new Date(a.date) - new Date(b.date))
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                   .map((session, index) => (
                     <div key={index} className="bg-white/5 rounded-lg p-4 border border-white/10">
                       <div className="flex justify-between items-start mb-3">
@@ -9312,9 +10138,417 @@ const AdminPanel = () => {
         </div>
       )}
 
+      {/* Edit Leaderboard Entry Modal */}
+      {isEditLeaderboardModalOpen && editingLeaderboardEntry && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg border border-white/20 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-white">Edit Leaderboard Entry</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditLeaderboardModalOpen(false);
+                    setEditingLeaderboardEntry(null);
+                  }}
+                  className="text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white mb-2 block">User</Label>
+                  <div className="bg-white/10 border border-white/20 rounded-lg p-3 text-white">
+                    {editingLeaderboardEntry.firstName} {editingLeaderboardEntry.lastName} (@{editingLeaderboardEntry.username})
+                  </div>
+                </div>
+
+                {/* MT5 Account Credentials */}
+                {editingLeaderboardEntry.mt5Account && (
+                  <div>
+                    <Label className="text-white mb-2 block text-sm sm:text-base">MT5 Account Credentials</Label>
+                    <div className="bg-white/10 border border-white/20 rounded-lg p-3 text-white text-sm sm:text-base">
+                      <div className="space-y-1">
+                        <p className="text-gray-300 text-sm">
+                          <span className="text-gray-400">Account ID:</span> {editingLeaderboardEntry.mt5Account.id || 'Not set'}
+                        </p>
+                        <p className="text-gray-300 text-sm">
+                          <span className="text-gray-400">Server:</span> {editingLeaderboardEntry.mt5Account.server || 'Not set'}
+                        </p>
+                        <p className="text-gray-300 text-sm">
+                          <span className="text-gray-400">Password:</span> {editingLeaderboardEntry.mt5Account.password || 'Not set'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label className="text-white mb-2 block">Account ID</Label>
+                  <Input
+                    value={editingLeaderboardEntry.accountId || ''}
+                    onChange={(e) => setEditingLeaderboardEntry(prev => ({ ...prev, accountId: e.target.value }))}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block">Balance ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingLeaderboardEntry.balance || ''}
+                    onChange={(e) => {
+                      const newBalance = parseFloat(e.target.value) || 0;
+                      const currentProfit = editingLeaderboardEntry.profit || 0;
+                      const newProfitPercent = newBalance > 0 ? (currentProfit / newBalance) * 100 : 0;
+                      setEditingLeaderboardEntry(prev => ({ 
+                        ...prev, 
+                        balance: newBalance,
+                        profitPercent: newProfitPercent
+                      }));
+                    }}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block">Equity ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingLeaderboardEntry.equity || ''}
+                    onChange={(e) => setEditingLeaderboardEntry(prev => ({ ...prev, equity: parseFloat(e.target.value) || 0 }))}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block">Profit ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingLeaderboardEntry.profit || ''}
+                    onChange={(e) => {
+                      const newProfit = parseFloat(e.target.value) || 0;
+                      const currentBalance = editingLeaderboardEntry.balance || 0;
+                      const newProfitPercent = currentBalance > 0 ? (newProfit / currentBalance) * 100 : 0;
+                      setEditingLeaderboardEntry(prev => ({ 
+                        ...prev, 
+                        profit: newProfit,
+                        profitPercent: newProfitPercent
+                      }));
+                    }}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block">Profit Percentage (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingLeaderboardEntry.profitPercent || ''}
+                    readOnly
+                    className="bg-white/5 border-white/10 text-white cursor-not-allowed"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">Automatically calculated from profit and balance</p>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block">Margin ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingLeaderboardEntry.margin || ''}
+                    onChange={(e) => setEditingLeaderboardEntry(prev => ({ ...prev, margin: parseFloat(e.target.value) || 0 }))}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block">Free Margin ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingLeaderboardEntry.freeMargin || ''}
+                    onChange={(e) => setEditingLeaderboardEntry(prev => ({ ...prev, freeMargin: parseFloat(e.target.value) || 0 }))}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block">Margin Level (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingLeaderboardEntry.marginLevel || ''}
+                    onChange={(e) => setEditingLeaderboardEntry(prev => ({ ...prev, marginLevel: parseFloat(e.target.value) || 0 }))}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditLeaderboardModalOpen(false);
+                    setEditingLeaderboardEntry(null);
+                  }}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => updateLeaderboardEntry(editingLeaderboardEntry._id, editingLeaderboardEntry)}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Update Entry
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Management Modal */}
+      {isUserManagementModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-gray-900 rounded-lg border border-white/20 w-full max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg sm:text-xl font-semibold text-white">Manage User</h3>
+                  {selectedUser.competitionName && (
+                    <p className="text-gray-400 text-xs sm:text-sm truncate">Competition: {selectedUser.competitionName}</p>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setIsUserManagementModalOpen(false);
+                    setSelectedUser(null);
+                  }}
+                  className="text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">User Information</Label>
+                  <div className="bg-white/10 border border-white/20 rounded-lg p-3 text-white text-sm sm:text-base">
+                    <div className="font-semibold">{selectedUser.user?.firstName} {selectedUser.user?.lastName}</div>
+                    <div className="text-gray-300">@{selectedUser.user?.username}</div>
+                    <div className="text-gray-400 text-xs">{selectedUser.user?.email}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">Competition Details</Label>
+                  <div className="bg-white/10 border border-white/20 rounded-lg p-3 text-white text-sm sm:text-base">
+                    <div className="font-semibold">{selectedUser.competitionName}</div>
+                    <div className="text-gray-300">Account Size: ${selectedUser.competitionId ? competitions.find(c => c._id === selectedUser.competitionId)?.accountSize?.toLocaleString() || '0' : '0'}</div>
+                  </div>
+                </div>
+
+                {/* MT5 Credentials Display */}
+                {selectedUser.mt5Account && (
+                  <div>
+                    <Label className="text-white mb-2 block text-sm sm:text-base">MT5 Account Credentials</Label>
+                    <div className="bg-white/10 border border-white/20 rounded-lg p-3 text-white text-sm sm:text-base">
+                      <div className="space-y-1">
+                        <p className="text-gray-300 text-sm">
+                          <span className="text-gray-400">Account ID:</span> {selectedUser.mt5Account.id || 'Not set'}
+                        </p>
+                        <p className="text-gray-300 text-sm">
+                          <span className="text-gray-400">Server:</span> {selectedUser.mt5Account.server || 'Not set'}
+                        </p>
+                        <p className="text-gray-300 text-sm">
+                          <span className="text-gray-400">Password:</span> {selectedUser.mt5Account.password || 'Not set'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">Current Balance ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={selectedUser.currentBalance || ''}
+                    onChange={(e) => setSelectedUser(prev => ({ ...prev, currentBalance: parseFloat(e.target.value) || 0 }))}
+                    className="bg-white/10 border-white/20 text-white text-sm sm:text-base"
+                    placeholder="Enter current account balance"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">Default: Competition account size</p>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">Profit/Loss ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={selectedUser.profit || ''}
+                    onChange={(e) => setSelectedUser(prev => ({ ...prev, profit: parseFloat(e.target.value) || 0 }))}
+                    className="bg-white/10 border-white/20 text-white text-sm sm:text-base"
+                    placeholder="Enter profit or loss amount"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">Positive for profit, negative for loss</p>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">Participation Status</Label>
+                  <Select
+                    value={selectedUser.status}
+                    onValueChange={(value) => setSelectedUser(prev => ({ ...prev, status: value }))}
+                  >
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white text-sm sm:text-base">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending_setup">Pending Setup - User hasn't set up MT5</SelectItem>
+                      <SelectItem value="active">Active - Currently trading</SelectItem>
+                      <SelectItem value="completed">Completed - Challenge finished</SelectItem>
+                      <SelectItem value="failed">Failed - Challenge failed</SelectItem>
+                      <SelectItem value="withdrawn">Withdrawn - User left challenge</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-gray-400 text-xs mt-1">Track the user's participation status</p>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">MT5 Account ID</Label>
+                  <Input
+                    value={selectedUser.mt5Account?.id || ''}
+                    onChange={(e) => setSelectedUser(prev => ({ 
+                      ...prev, 
+                      mt5Account: { ...prev.mt5Account, id: e.target.value }
+                    }))}
+                    placeholder="e.g., 12345678"
+                    className="bg-white/10 border-white/20 text-white text-sm sm:text-base"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">User's MetaTrader 5 account number</p>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">MT5 Server</Label>
+                  <Input
+                    value={selectedUser.mt5Account?.server || ''}
+                    onChange={(e) => setSelectedUser(prev => ({ 
+                      ...prev, 
+                      mt5Account: { ...prev.mt5Account, server: e.target.value }
+                    }))}
+                    placeholder="e.g., Demo-Server"
+                    className="bg-white/10 border-white/20 text-white text-sm sm:text-base"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">MetaTrader 5 server name</p>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">MT5 Password</Label>
+                  <Input
+                    type="password"
+                    value={selectedUser.mt5Account?.password || ''}
+                    onChange={(e) => setSelectedUser(prev => ({ 
+                      ...prev, 
+                      mt5Account: { ...prev.mt5Account, password: e.target.value }
+                    }))}
+                    placeholder="Enter MT5 password"
+                    className="bg-white/10 border-white/20 text-white text-sm sm:text-base"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">MetaTrader 5 account password</p>
+                </div>
+
+                <div>
+                  <Label className="text-white mb-2 block text-sm sm:text-base">Profit Percentage (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={selectedUser.profitPercent || ''}
+                    onChange={(e) => setSelectedUser(prev => ({ ...prev, profitPercent: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0.00"
+                    className="bg-white/10 border-white/20 text-white text-sm sm:text-base"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">Calculated automatically from profit/balance</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 sm:pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsUserManagementModalOpen(false);
+                    setSelectedUser(null);
+                  }}
+                  className="border-white/20 text-white hover:bg-white/10 text-sm sm:text-base"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('token');
+                      if (!token) {
+                        toast.error('Authentication required');
+                        return;
+                      }
+
+                      const response = await fetch(`http://localhost:5000/api/challenges/${selectedUser.competitionId || selectedCompetition}/participants/${selectedUser._id}`, {
+                        method: 'PUT',
+                        headers: {
+                          'Authorization': `Bearer ${token}`,
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                          currentBalance: selectedUser.currentBalance,
+                          profit: selectedUser.profit,
+                          status: selectedUser.status,
+                          mt5Account: selectedUser.mt5Account,
+                          profitPercent: selectedUser.profitPercent
+                        })
+                      });
+
+                      if (response.ok) {
+                        toast.success('User updated successfully');
+                        setIsUserManagementModalOpen(false);
+                        setSelectedUser(null);
+                        // Refresh all data
+                        await fetchCompetitions();
+                        await fetchLeaderboard();
+                        if (selectedCompetition !== 'all') {
+                          await fetchCompetitionParticipants(selectedCompetition);
+                        }
+                      } else {
+                        toast.error('Failed to update user');
+                      }
+                    } catch (error) {
+                      console.error('Error updating user:', error);
+                      toast.error('Error updating user');
+                    }
+                  }}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm sm:text-base"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Update User
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </>
   );
 };
 
 export default AdminPanel;
+// End of AdminPanel component

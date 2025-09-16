@@ -301,10 +301,10 @@ const MentorshipPayment = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => navigate(`/mentorships/${planId}`)}
-                className="text-white hover:bg-white/10"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Plan

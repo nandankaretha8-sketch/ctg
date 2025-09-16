@@ -28,6 +28,7 @@ import {
   Settings
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSettings } from '@/contexts/SettingsContext';
 import { toast } from 'sonner';
 
 interface MentorshipPlan {
@@ -80,6 +81,7 @@ const MentorshipDashboard = () => {
   const { planId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { settings } = useSettings();
   
   const [plan, setPlan] = useState<MentorshipPlan | null>(null);
   const [subscription, setSubscription] = useState<MentorshipSubscription | null>(null);
@@ -294,9 +296,9 @@ const MentorshipDashboard = () => {
         {/* Header */}
         <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 lg:mb-8">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => navigate('/mentorships')}
-            className="text-white hover:bg-white/10 text-sm sm:text-base"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 text-sm sm:text-base"
           >
             <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Back to Mentorships</span>
@@ -371,8 +373,18 @@ const MentorshipDashboard = () => {
               </CardHeader>
               <CardContent className="p-6 pt-0">
                 <div className="flex items-start space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <User className="h-8 w-8 text-white" />
+                  <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center">
+                    {settings?.mentorPhoto ? (
+                      <img
+                        src={settings.mentorPhoto}
+                        alt="Mentor"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                        <User className="h-8 w-8 text-white" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-white font-semibold text-lg mb-2">

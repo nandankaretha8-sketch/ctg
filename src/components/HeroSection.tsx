@@ -25,7 +25,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
       
       {/* Content */}
-      <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
+      <div className="relative z-10 text-center max-w-6xl mx-auto px-4 pt-16 md:pt-20 lg:pt-24">
         <div className="animate-fade-in-up">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             <span className="gradient-text">Prove Your</span><br />

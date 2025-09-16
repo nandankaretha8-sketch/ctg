@@ -24,6 +24,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSettings } from '@/contexts/SettingsContext';
 import { toast } from 'sonner';
 
 interface MentorshipPlan {
@@ -54,6 +55,7 @@ const MentorshipDetails = () => {
   const { id: planId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { settings } = useSettings();
   
   const [plan, setPlan] = useState<MentorshipPlan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -416,8 +418,18 @@ const MentorshipDetails = () => {
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <User className="h-8 w-8 text-white" />
+                  <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center mx-auto mb-4">
+                    {settings?.mentorPhoto ? (
+                      <img
+                        src={settings.mentorPhoto}
+                        alt="Mentor"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                        <User className="h-8 w-8 text-white" />
+                      </div>
+                    )}
                   </div>
                   <h3 className="text-white font-semibold text-lg mb-2">
                     {plan.metadata.mentorName}

@@ -229,9 +229,9 @@ const Chatbox = () => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => navigate('/signal-plans')}
-            className="text-white hover:bg-white/10"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Signal Plans
@@ -259,7 +259,7 @@ const Chatbox = () => {
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Subscribers:</span>
+                    <span className="text-gray-400">Total Views:</span>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-blue-400" />
                       <span className="text-white font-medium">{chatbox.subscriberCount}</span>
