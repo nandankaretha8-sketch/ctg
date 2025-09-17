@@ -48,21 +48,21 @@ const HeroSection = () => {
       id: 'prop-firms',
       title: 'Prop Firm Services',
       subtitle: 'Pass Prop Firm Challenges',
-      description: 'Get professional support to pass prop firm challenges. Access funding and start trading with real capital.',
+      description: 'Get professional support to pass prop firm challenges. We help you manage your account to meet their requirements.',
       icon: CheckCircle,
       color: 'from-green-500 to-emerald-500',
       iconColor: 'text-green-400',
       route: '/prop-firm-packages',
-      ctaText: 'Get Funded',
-      stats: 'Real Capital'
+      ctaText: 'Pass Challenge',
+      stats: 'Account Management'
     }
   ];
 
-  // Auto-rotate tabs every 5 seconds
+  // Auto-rotate tabs every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % services.length);
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [services.length]);
