@@ -560,6 +560,25 @@
     }
   }
 
+  /* Enhanced Vignette Effects */
+  .vignette-dark {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 0%, transparent 30%, rgba(88, 28, 135, 0.3) 70%, rgba(88, 28, 135, 0.6) 100%);
+    pointer-events: none;
+  }
+
+  .vignette-corners {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at top left, rgba(88, 28, 135, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at top right, rgba(88, 28, 135, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom left, rgba(88, 28, 135, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(88, 28, 135, 0.4) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
   /* Hide scrollbars */
   .scrollbar-hide {
     -ms-overflow-style: none;  /* Internet Explorer 10+ */
