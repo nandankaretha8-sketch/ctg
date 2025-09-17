@@ -6,11 +6,17 @@ const getApiBaseUrl = (): string => {
   return import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 };
 
+const getApiUrl = (): string => {
+  // Use the full API URL with /api prefix
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+};
+
 export const API_BASE_URL = getApiBaseUrl();
+export const API_URL = getApiUrl();
 
 // Helper function to make API calls
 export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${API_URL}${endpoint}`;
   
   const defaultOptions: RequestInit = {
     headers: {
@@ -41,6 +47,7 @@ export const authenticatedApiCall = async (endpoint: string, options: RequestIni
 
 export default {
   API_BASE_URL,
+  API_URL,
   apiCall,
   authenticatedApiCall,
 };
