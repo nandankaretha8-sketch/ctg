@@ -455,7 +455,7 @@
     );
     background-size: 400% 400%;
     border-radius: 60px;
-    opacity: 0.4;
+    opacity: 0.15;
     animation: ribbon-flow 20s ease-in-out infinite, ribbon-color-shift 15s ease-in-out infinite;
     box-shadow: 
       0 0 30px hsl(270, 50%, 20%),
@@ -478,23 +478,6 @@
     opacity: 0.3;
   }
 
-  .ribbon-3 {
-    top: 60%;
-    left: -50%;
-    animation-delay: -10s;
-    animation-duration: 22s, 16s;
-    height: 140px;
-    opacity: 0.35;
-  }
-
-  .ribbon-4 {
-    top: 80%;
-    left: -50%;
-    animation-delay: -15s;
-    animation-duration: 28s, 22s;
-    height: 110px;
-    opacity: 0.25;
-  }
 
   /* Additional Ribbon Wave Effect */
   .ribbon-wave {
@@ -528,23 +511,14 @@
   @media (max-width: 768px) {
     .ribbon {
       height: 80px;
-      opacity: 0.3;
+      opacity: 0.12;
     }
     
     .ribbon-2 {
       height: 70px;
-      opacity: 0.25;
+      opacity: 0.1;
     }
     
-    .ribbon-3 {
-      height: 90px;
-      opacity: 0.28;
-    }
-    
-    .ribbon-4 {
-      height: 75px;
-      opacity: 0.2;
-    }
     
     .ribbon-wave {
       height: 60px;

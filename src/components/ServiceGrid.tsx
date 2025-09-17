@@ -124,10 +124,6 @@ const ServiceGrid = () => {
       <div className="ribbon-background">
         <div className="ribbon ribbon-1"></div>
         <div className="ribbon ribbon-2"></div>
-        <div className="ribbon ribbon-3"></div>
-        <div className="ribbon ribbon-4"></div>
-        <div className="ribbon-wave ribbon-wave-1"></div>
-        <div className="ribbon-wave ribbon-wave-2"></div>
       </div>
       
       {/* Content */}
