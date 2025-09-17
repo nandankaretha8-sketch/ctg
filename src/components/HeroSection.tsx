@@ -1,9 +1,71 @@
-import { ArrowRight, Trophy, Target, Infinity, Rocket, CheckCircle } from "lucide-react";
+import { ArrowRight, Trophy, Target, Infinity, Rocket, CheckCircle, Users, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(0);
+
+  const services = [
+    {
+      id: 'competitions',
+      title: 'Trading Competitions',
+      subtitle: 'Prove Your Trading Skills',
+      description: 'Join exciting competitions, track your progress, and climb the leaderboard. Show the world what you\'re capable of.',
+      icon: Trophy,
+      color: 'from-purple-600 to-pink-600',
+      iconColor: 'text-purple-400',
+      route: '/challenges',
+      ctaText: 'Start Your Competition',
+      stats: 'Win Rewards'
+    },
+    {
+      id: 'signals',
+      title: 'Expert Trading Signals',
+      subtitle: 'Get Signals from Professionals',
+      description: 'Receive high-quality trading signals from experienced traders. Follow proven strategies and maximize your profits.',
+      icon: Rocket,
+      color: 'from-orange-500 to-red-500',
+      iconColor: 'text-orange-400',
+      route: '/signal-plans',
+      ctaText: 'Get Signals Now',
+      stats: 'Expert Analysis'
+    },
+    {
+      id: 'mentorships',
+      title: 'Trading Mentorships',
+      subtitle: 'Learn from the Best',
+      description: 'Get personalized guidance from professional traders. Learn advanced strategies and accelerate your trading journey.',
+      icon: Users,
+      color: 'from-blue-500 to-cyan-500',
+      iconColor: 'text-blue-400',
+      route: '/mentorships',
+      ctaText: 'Start Learning',
+      stats: 'Personal Growth'
+    },
+    {
+      id: 'prop-firms',
+      title: 'Prop Firm Services',
+      subtitle: 'Pass Prop Firm Challenges',
+      description: 'Get professional support to pass prop firm challenges. Access funding and start trading with real capital.',
+      icon: CheckCircle,
+      color: 'from-green-500 to-emerald-500',
+      iconColor: 'text-green-400',
+      route: '/prop-firm-packages',
+      ctaText: 'Get Funded',
+      stats: 'Real Capital'
+    }
+  ];
+
+  // Auto-rotate tabs every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTab((prev) => (prev + 1) % services.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [services.length]);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden particles pt-24">
@@ -27,160 +89,65 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4 pt-16 md:pt-20 lg:pt-24">
         <div className="animate-fade-in-up">
+          {/* Main Title */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="gradient-text">Prove Your</span><br />
-            <span className="text-white">Trading Skills</span>
+            <span className="gradient-text">Master Trading</span><br />
+            <span className="text-white">With Our Platform</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Join exciting competitions, track your progress, and climb the leaderboard. 
-            Show the world what you're capable of.
-          </p>
-          
-          <div className="flex justify-center items-center">
-            <button
-              onClick={() => navigate('/challenges')}
-              className="group bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg px-8 py-2 rounded-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow"
-              style={{ 
-                color: 'white !important'
-              }}
-            >
-              <span style={{ color: 'white !important', opacity: '1 !important' }}>Start Your Competition</span>
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform inline" style={{ color: 'white !important' }} />
-            </button>
-          </div>
-        </div>
-        
-        {/* Stats - Desktop Two Lines */}
-        <div className="mt-16 hidden md:block animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <div className="flex flex-col items-center space-y-4">
-            {/* First line: Win Rewards and Skills Into Success */}
-            <div className="flex items-center justify-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <Trophy className="h-8 w-8 text-purple-400" style={{ filter: 'drop-shadow(0 0 15px rgba(168, 85, 247, 0.8))' }} />
-                <span className="text-white font-semibold text-lg">Win Rewards</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Target className="h-8 w-8 text-blue-400" style={{ filter: 'drop-shadow(0 0 15px rgba(59, 130, 246, 0.8))' }} />
-                <span className="text-white font-semibold text-lg">Skills Into Success</span>
-              </div>
-            </div>
-            {/* Second line: No Limits */}
-            <div className="flex items-center justify-center space-x-2">
-              <Infinity className="h-8 w-8 text-green-400" style={{ filter: 'drop-shadow(0 0 15px rgba(34, 197, 94, 0.8))' }} />
-              <span className="text-white font-semibold text-lg">No Limits</span>
+          {/* Service Tabs */}
+          <div className="mb-8">
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {services.map((service, index) => (
+                <button
+                  key={service.id}
+                  onClick={() => setActiveTab(index)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                    activeTab === index
+                      ? `bg-gradient-to-r ${service.color} text-white shadow-lg`
+                      : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
+                  }`}
+                >
+                  {service.title}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Services Section - Desktop */}
-        <div className="mt-16 mb-20 hidden md:block animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold gradient-text mb-2">Other Services</h3>
-            <p className="text-gray-400 text-lg">Discover what we offer</p>
-          </div>
-          
-          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
-            {/* Signals Service Card */}
-            <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 text-center hover:scale-105 hover:bg-white/8 transition-all duration-300">
-              <div className="flex justify-center mb-4">
-                <Rocket className="h-12 w-12 text-orange-400 transition-all duration-300" 
-                        style={{ filter: 'drop-shadow(0 0 20px rgba(251, 146, 60, 0.8))' }} />
-              </div>
-              <h4 className="text-xl font-bold text-white mb-4">
-                Get Signals from Experts
-              </h4>
-              <button 
-                onClick={() => navigate('/signal-plans')}
-                className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-base px-6 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-              >
-                Join Now
-              </button>
+          {/* Active Service Content */}
+          <div className="animate-fade-in-up">
+            <div className="mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                {services[activeTab].subtitle}
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                {services[activeTab].description}
+              </p>
             </div>
-
-            {/* Prop Firm Passing Service Card */}
-            <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 text-center hover:scale-105 hover:bg-white/8 transition-all duration-300">
-              <div className="flex justify-center mb-4">
-                <CheckCircle className="h-12 w-12 text-green-400 transition-all duration-300" 
-                             style={{ filter: 'drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))' }} />
-              </div>
-              <h4 className="text-xl font-bold text-white mb-4">
-                Prop Firm Passing
-              </h4>
-              <button 
-                onClick={() => navigate('/prop-firm-packages')}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold text-base px-6 py-2 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-              >
-                Join Now
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats - Mobile Two Lines with Pulse */}
-        <div className="mt-16 md:hidden animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <div className="flex flex-col items-center space-y-4 ml-4 px-4">
-            {/* First line: Win Rewards and Skills Into Success */}
-            <div className="flex items-center justify-between w-full max-w-sm">
-              <div className="flex items-center space-x-2 animate-pulse">
-                    <Trophy className="h-8 w-8 text-purple-400" style={{ filter: 'drop-shadow(0 0 15px rgba(168, 85, 247, 0.8))' }} />
-                    <span className="text-white font-semibold text-lg">Win Rewards</span>
-                  </div>
-              <div className="flex items-center animate-pulse ml-2" style={{ animationDelay: '0.5s' }}>
-                <Target className="h-8 w-8 text-blue-400 ml-4" style={{ filter: 'drop-shadow(0 0 15px rgba(59, 130, 246, 0.8))' }} />
-                    <span className="text-white font-semibold text-lg">Skills Into Success</span>
-                  </div>
-            </div>
-            {/* Second line: No Limits */}
-            <div className="flex items-center justify-center space-x-2 animate-pulse" style={{ animationDelay: '1s' }}>
-                    <Infinity className="h-8 w-8 text-green-400" style={{ filter: 'drop-shadow(0 0 15px rgba(34, 197, 94, 0.8))' }} />
-                    <span className="text-white font-semibold text-lg">No Limits</span>
-                  </div>
-                </div>
-              </div>
-
-        {/* Services Section - Mobile */}
-        <div className="mt-12 mb-16 md:hidden animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <div className="flex flex-col items-center space-y-4 px-4">
-            <div className="text-center mb-4">
-              <h3 className="text-2xl font-bold gradient-text mb-2">Other Services</h3>
-              <p className="text-gray-400 text-sm">Discover what we offer</p>
-                  </div>
             
-            {/* Two separate service cards in one line */}
-            <div className="w-full max-w-sm flex gap-3">
-              {/* Signals Service Card */}
-              <div className="flex flex-col items-center space-y-2 p-3 backdrop-blur-md bg-white/5 border border-white/10 rounded-lg flex-1 hover:bg-white/8 transition-all duration-300">
-                <div className="flex justify-center">
-                  <Rocket className="h-8 w-8 text-orange-400" 
-                          style={{ filter: 'drop-shadow(0 0 10px rgba(251, 146, 60, 0.8))' }} />
-                  </div>
-                <h4 className="text-white font-semibold text-sm text-center">
-                  Get Signals
-                </h4>
-                <button 
-                  onClick={() => navigate('/signal-plans')}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-xs px-3 py-1 rounded-md shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-                >
-                  Join Now
-                </button>
-                  </div>
+            <div className="flex justify-center items-center mb-8">
+              <button
+                onClick={() => navigate(services[activeTab].route)}
+                className={`group bg-gradient-to-r ${services[activeTab].color} text-white font-bold text-lg px-8 py-3 rounded-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow`}
+                style={{ 
+                  color: 'white !important'
+                }}
+              >
+                <span style={{ color: 'white !important', opacity: '1 !important' }}>
+                  {services[activeTab].ctaText}
+                </span>
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform inline" style={{ color: 'white !important' }} />
+              </button>
+            </div>
 
-              {/* Prop Firm Passing Service Card */}
-              <div className="flex flex-col items-center space-y-2 p-3 backdrop-blur-md bg-white/5 border border-white/10 rounded-lg flex-1 hover:bg-white/8 transition-all duration-300">
-                <div className="flex justify-center">
-                  <CheckCircle className="h-8 w-8 text-green-400" 
-                               style={{ filter: 'drop-shadow(0 0 10px rgba(34, 197, 94, 0.8))' }} />
-                </div>
-                <h4 className="text-white font-semibold text-sm text-center">
-                  Pass Prop firm
-                </h4>
-                <button 
-                  onClick={() => navigate('/prop-firm-packages')}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold text-xs px-3 py-1 rounded-md shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-                >
-                  Join Now
-                </button>
+            {/* Service Icon and Stats */}
+            <div className="flex justify-center items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                {(() => {
+                  const IconComponent = services[activeTab].icon;
+                  return <IconComponent className={`h-8 w-8 ${services[activeTab].iconColor}`} style={{ filter: 'drop-shadow(0 0 15px rgba(168, 85, 247, 0.8))' }} />;
+                })()}
+                <span className="text-white font-semibold text-lg">{services[activeTab].stats}</span>
               </div>
             </div>
           </div>
