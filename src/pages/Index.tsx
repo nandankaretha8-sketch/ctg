@@ -13,7 +13,7 @@ const Index = () => {
       <Header />
       <HeroSection />
       <StepsSection />
-      <MentorshipsSection />
+      {/* <MentorshipsSection /> - Hidden since mentorships are now shown in hero tabs */}
       <YouTubeVideosSection />
       <NotificationsSection />
       <AdminTrustSection />
