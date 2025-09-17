@@ -118,13 +118,7 @@ const ServiceGrid = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-purple-900/30 to-purple-900/80" />
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-900/40 via-transparent to-purple-900/40" />
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-900/30 via-transparent to-purple-900/50" />
-      
-      {/* Enhanced Vignette Effects */}
-      <div className="vignette-dark" />
-      <div className="vignette-corners" />
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/85" />
       
       {/* Ribbon Gradient Background */}
       <div className="ribbon-background">
