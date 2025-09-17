@@ -115,39 +115,47 @@ const HeroSection = () => {
           </div>
 
           {/* Active Service Content */}
-          <div className="animate-fade-in-up">
-            <div className="mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                {services[activeTab].subtitle}
-              </h2>
-              <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-                {services[activeTab].description}
-              </p>
-            </div>
-            
-            <div className="flex justify-center items-center mb-8">
-              <button
-                onClick={() => navigate(services[activeTab].route)}
-                className={`group bg-gradient-to-r ${services[activeTab].color} text-white font-bold text-lg px-8 py-3 rounded-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow`}
-                style={{ 
-                  color: 'white !important'
-                }}
-              >
-                <span style={{ color: 'white !important', opacity: '1 !important' }}>
-                  {services[activeTab].ctaText}
-                </span>
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform inline" style={{ color: 'white !important' }} />
-              </button>
-            </div>
+          <div className="relative min-h-[400px] md:min-h-[350px]">
+            <div 
+              key={activeTab}
+              className="absolute inset-0 animate-fade-in-up"
+              style={{
+                animation: 'fadeInUp 0.6s ease-out'
+              }}
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
+                  {services[activeTab].subtitle}
+                </h2>
+                <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
+                  {services[activeTab].description}
+                </p>
+              </div>
+              
+              <div className="flex justify-center items-center mb-8 animate-slide-in-up" style={{ animationDelay: '0.3s' }}>
+                <button
+                  onClick={() => navigate(services[activeTab].route)}
+                  className={`group bg-gradient-to-r ${services[activeTab].color} text-white font-bold text-lg px-8 py-3 rounded-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow`}
+                  style={{ 
+                    color: 'white !important'
+                  }}
+                >
+                  <span style={{ color: 'white !important', opacity: '1 !important' }}>
+                    {services[activeTab].ctaText}
+                  </span>
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform inline" style={{ color: 'white !important' }} />
+                </button>
+              </div>
 
-            {/* Service Icon and Stats */}
-            <div className="flex justify-center items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                {(() => {
-                  const IconComponent = services[activeTab].icon;
-                  return <IconComponent className={`h-8 w-8 ${services[activeTab].iconColor}`} style={{ filter: 'drop-shadow(0 0 15px rgba(168, 85, 247, 0.8))' }} />;
-                })()}
-                <span className="text-white font-semibold text-lg">{services[activeTab].stats}</span>
+              {/* Service Icon and Stats */}
+              <div className="flex justify-center items-center space-x-4 mb-8 md:mb-12 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
+                <div className="flex items-center space-x-2">
+                  {(() => {
+                    const IconComponent = services[activeTab].icon;
+                    return <IconComponent className={`h-8 w-8 ${services[activeTab].iconColor}`} style={{ filter: 'drop-shadow(0 0 15px rgba(168, 85, 247, 0.8))' }} />;
+                  })()}
+                  <span className="text-white font-semibold text-lg">{services[activeTab].stats}</span>
+                </div>
               </div>
             </div>
           </div>
