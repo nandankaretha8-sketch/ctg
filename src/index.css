@@ -315,14 +315,17 @@
     transition: var(--transition-smooth);
     
     /* No backdrop blur on mobile for better performance and compatibility */
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     
     /* Ensure proper rendering on mobile browsers */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+    
+    /* Force solid background on mobile */
+    background-color: hsl(var(--glass) / 0.95) !important;
   }
 
   .glass-card-mobile:hover {
@@ -353,7 +356,8 @@
   /* iOS Safari specific fixes for glass morphism */
   @supports (-webkit-touch-callout: none) {
     .glass-card-mobile {
-      background: linear-gradient(135deg, hsl(var(--glass) / 0.98), hsl(var(--glass) / 0.92));
+      background: hsl(var(--glass) / 0.98) !important;
+      background-image: none !important;
       -webkit-backdrop-filter: none !important;
       backdrop-filter: none !important;
     }
@@ -364,6 +368,26 @@
     }
   }
 
+  /* iPhone Safari specific fixes */
+  @media screen and (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
+    .glass-card-mobile {
+      background: hsl(var(--glass) / 0.98) !important;
+      background-image: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+  }
+
+  /* Additional Safari mobile fixes */
+  @media screen and (max-width: 768px) {
+    .glass-card-mobile {
+      background: hsl(var(--glass) / 0.98) !important;
+      background-image: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+  }
+
   /* Additional mobile browser support */
   @media (max-width: 768px) {
     .glass-card-mobile {
@@ -371,6 +395,28 @@
       will-change: transform;
       -webkit-transform: translate3d(0, 0, 0);
       transform: translate3d(0, 0, 0);
+    }
+  }
+
+  /* Force solid backgrounds for all mobile devices - especially iPhone Safari */
+  @media (max-width: 768px) {
+    .glass-card-mobile,
+    .glass-card-mobile * {
+      background: hsl(var(--glass) / 0.98) !important;
+      background-image: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+  }
+
+  /* iPhone Safari specific - most aggressive fix */
+  @media screen and (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait) {
+    .glass-card-mobile,
+    .glass-card-mobile * {
+      background: hsl(var(--glass) / 0.98) !important;
+      background-image: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
     }
   }
 }

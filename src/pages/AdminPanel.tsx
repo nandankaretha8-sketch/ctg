@@ -177,7 +177,8 @@ const AdminPanel = () => {
   
   // Utility function to get responsive glass card classes
   const getGlassCardClasses = (additionalClasses = '') => {
-    return `md:glass-card-desktop glass-card-mobile ${additionalClasses}`;
+    // Force mobile classes for better Safari compatibility
+    return `glass-card-mobile ${additionalClasses}`;
   };
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
