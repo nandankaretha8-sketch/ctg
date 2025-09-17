@@ -22,7 +22,7 @@ const ServiceGrid = () => {
       description: 'Learn from expert mentors',
       icon: Users,
       color: 'from-blue-500 to-cyan-500',
-      iconColor: 'text-blue-400',
+      iconColor: 'text-blue-300',
       route: '/mentorships',
       isActive: true
     },
@@ -33,7 +33,7 @@ const ServiceGrid = () => {
       description: 'Get expert trading signals',
       icon: Rocket,
       color: 'from-orange-500 to-red-500',
-      iconColor: 'text-orange-400',
+      iconColor: 'text-orange-300',
       route: '/signal-plans',
       isActive: true
     },
@@ -44,7 +44,7 @@ const ServiceGrid = () => {
       description: 'Join trading competitions',
       icon: Trophy,
       color: 'from-purple-600 to-pink-600',
-      iconColor: 'text-purple-400',
+      iconColor: 'text-purple-300',
       route: '/challenges',
       isActive: true
     },
@@ -55,7 +55,7 @@ const ServiceGrid = () => {
       description: 'Pass prop firm challenges',
       icon: CheckCircle,
       color: 'from-green-500 to-emerald-500',
-      iconColor: 'text-green-400',
+      iconColor: 'text-green-300',
       route: '/prop-firm-packages',
       isActive: true
     },
@@ -66,7 +66,7 @@ const ServiceGrid = () => {
       description: 'Learn trading strategies',
       icon: BookOpen,
       color: 'from-indigo-500 to-purple-500',
-      iconColor: 'text-indigo-400',
+      iconColor: 'text-indigo-300',
       route: '/courses',
       isActive: false // Keep card but not connected yet
     },
@@ -77,7 +77,7 @@ const ServiceGrid = () => {
       description: 'Copy successful traders',
       icon: Copy,
       color: 'from-teal-500 to-cyan-500',
-      iconColor: 'text-teal-400',
+      iconColor: 'text-teal-300',
       route: '/copytrade',
       isActive: false // Keep card but not connected yet
     },
@@ -88,7 +88,7 @@ const ServiceGrid = () => {
       description: 'Connect with traders',
       icon: MessageCircle,
       color: 'from-pink-500 to-rose-500',
-      iconColor: 'text-pink-400',
+      iconColor: 'text-pink-300',
       route: '/community',
       isActive: false // Keep card but not connected yet
     },
@@ -99,7 +99,7 @@ const ServiceGrid = () => {
       description: 'Contact our support team',
       icon: HeadphonesIcon,
       color: 'from-gray-500 to-slate-500',
-      iconColor: 'text-gray-400',
+      iconColor: 'text-gray-300',
       route: '/support',
       isActive: true
     }
@@ -128,9 +128,6 @@ const ServiceGrid = () => {
             <span className="gradient-text">Master Trading</span><br />
             <span className="text-white">With Our Platform</span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Choose from our comprehensive suite of trading services to accelerate your success
-          </p>
         </div>
 
         {/* Grid Container */}
@@ -152,8 +149,11 @@ const ServiceGrid = () => {
               <div className={`
                 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-3 md:mb-4
                 bg-gradient-to-r ${service.color} shadow-lg group-hover:shadow-xl transition-all duration-300
+                relative overflow-hidden
               `}>
-                <IconComponent className={`h-6 w-6 md:h-8 md:w-8 ${service.iconColor}`} />
+                <IconComponent className={`h-6 w-6 md:h-8 md:w-8 ${service.iconColor} drop-shadow-lg filter brightness-110`} style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.3)) brightness(1.2)' }} />
+                {/* Glow effect */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
               {/* Title */}
@@ -182,12 +182,6 @@ const ServiceGrid = () => {
         })}
         </div>
 
-        {/* Description Text */}
-        <div className="text-center mt-8">
-          <p className="text-gray-400 text-sm md:text-base">
-            Tap any card above to get started with our trading services
-          </p>
-        </div>
       </div>
     </section>
   );
