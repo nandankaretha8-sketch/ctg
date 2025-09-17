@@ -118,11 +118,31 @@
 @layer components {
   /* Glass Card Component */
   .glass-card {
-    @apply backdrop-blur-md border border-solid;
+    @apply border border-solid;
     background: linear-gradient(135deg, hsl(var(--glass) / 0.8), hsl(var(--glass) / 0.4));
     border-color: hsl(var(--glass-border) / 0.3);
     box-shadow: var(--shadow-glass);
     transition: var(--transition-smooth);
+    
+    /* Backdrop blur with fallbacks for mobile */
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    
+    /* Mobile fallback - more opaque background */
+    @media (max-width: 768px) {
+      background: linear-gradient(135deg, hsl(var(--glass) / 0.95), hsl(var(--glass) / 0.85));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    
+    /* iOS Safari specific fixes */
+    @supports (-webkit-touch-callout: none) {
+      @media (max-width: 768px) {
+        background: linear-gradient(135deg, hsl(var(--glass) / 0.98), hsl(var(--glass) / 0.92));
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
   }
 
   .glass-card:hover {
@@ -284,5 +304,73 @@
   }
   .scrollbar-hide::-webkit-scrollbar { 
     display: none;  /* Safari and Chrome */
+  }
+
+  /* Mobile-optimized glass cards for admin panel */
+  .glass-card-mobile {
+    @apply border border-solid;
+    background: linear-gradient(135deg, hsl(var(--glass) / 0.95), hsl(var(--glass) / 0.85));
+    border-color: hsl(var(--glass-border) / 0.3);
+    box-shadow: var(--shadow-glass);
+    transition: var(--transition-smooth);
+    
+    /* No backdrop blur on mobile for better performance and compatibility */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    
+    /* Ensure proper rendering on mobile browsers */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .glass-card-mobile:hover {
+    border-color: hsl(var(--glass-border) / 0.6);
+    box-shadow: var(--glow-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Desktop glass cards with backdrop blur */
+  .glass-card-desktop {
+    @apply border border-solid;
+    background: linear-gradient(135deg, hsl(var(--glass) / 0.8), hsl(var(--glass) / 0.4));
+    border-color: hsl(var(--glass-border) / 0.3);
+    box-shadow: var(--shadow-glass);
+    transition: var(--transition-smooth);
+    
+    /* Backdrop blur for desktop */
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .glass-card-desktop:hover {
+    border-color: hsl(var(--glass-border) / 0.6);
+    box-shadow: var(--glow-primary);
+    transform: translateY(-2px);
+  }
+
+  /* iOS Safari specific fixes for glass morphism */
+  @supports (-webkit-touch-callout: none) {
+    .glass-card-mobile {
+      background: linear-gradient(135deg, hsl(var(--glass) / 0.98), hsl(var(--glass) / 0.92));
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+    
+    .glass-card-desktop {
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+  }
+
+  /* Additional mobile browser support */
+  @media (max-width: 768px) {
+    .glass-card-mobile {
+      /* Force hardware acceleration for smoother rendering */
+      will-change: transform;
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+    }
   }
 }

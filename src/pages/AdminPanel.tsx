@@ -14,6 +14,7 @@ import SettingsPanel from '@/components/SettingsPanel';
 import PropFirmServiceDetailsModal from '@/components/PropFirmServiceDetailsModal';
 import SignalManager from '@/components/admin/SignalManager';
 import PushNotificationSender from '@/components/admin/PushNotificationSender';
+import { API_URL } from '@/lib/api';
 
 // Custom Date Picker Component
 const CustomDatePicker = ({ selectedDate, onDateSelect, onClose }: {
@@ -173,6 +174,11 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [activeMenu, setActiveMenu] = useState('challenges');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Utility function to get responsive glass card classes
+  const getGlassCardClasses = (additionalClasses = '') => {
+    return `md:glass-card-desktop glass-card-mobile ${additionalClasses}`;
+  };
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<any>(null);
@@ -442,7 +448,7 @@ const AdminPanel = () => {
       setChallengesLoading(true);
       
       // Use public endpoint to get all challenges (not just admin's own)
-      const response = await fetch('http://localhost:5000/api/challenges?status=active,upcoming,completed');
+      const response = await fetch(`${API_URL}/challenges?status=active,upcoming,completed`);
       
       if (!response.ok) {
         throw new Error(`Challenges API error: ${response.status}`);
@@ -472,7 +478,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/notifications', {
+      const response = await fetch(`${API_URL}/notifications`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -506,7 +512,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch(`${API_URL}/users`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -554,7 +560,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/signal-plans', {
+      const response = await fetch(`${API_URL}/signal-plans`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -590,7 +596,7 @@ const AdminPanel = () => {
         return;
       }
       
-      const url = `http://localhost:5000/api/leaderboard?challengeId=${selectedCompetition}&limit=100&_t=${Date.now()}`;
+      const url = `${API_URL}/leaderboard?challengeId=${selectedCompetition}&limit=100&_t=${Date.now()}`;
       
       const response = await fetch(url);
       
@@ -619,7 +625,7 @@ const AdminPanel = () => {
   // Fetch competitions
   const fetchCompetitions = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/challenges');
+      const response = await fetch(`${API_URL}/challenges`);
       
       if (!response.ok) {
         throw new Error(`Competitions API error: ${response.status}`);
@@ -651,7 +657,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/challenges/${competitionId}/participants`, {
+      const response = await fetch(`${API_URL}/challenges/${competitionId}/participants`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -699,7 +705,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/leaderboard/update-mt5', {
+      const response = await fetch(`${API_URL}/leaderboard/update-mt5`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -735,7 +741,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://localhost:5000/api/challenges/admin/sync-leaderboard', {
+      const response = await fetch(`${API_URL}/challenges/admin/sync-leaderboard`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -788,7 +794,7 @@ const AdminPanel = () => {
           throw new Error('Missing competition or participant information');
         }
 
-        const response = await fetch(`http://localhost:5000/api/challenges/${selectedCompetition}/participants/${participantId}`, {
+        const response = await fetch(`${API_URL}/challenges/${selectedCompetition}/participants/${participantId}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -819,7 +825,7 @@ const AdminPanel = () => {
         }
       } else {
         // This is a global leaderboard entry, update via leaderboard API
-        const response = await fetch(`http://localhost:5000/api/leaderboard/${entryId}`, {
+        const response = await fetch(`${API_URL}/leaderboard/${entryId}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -857,7 +863,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`http://localhost:5000/api/leaderboard/${entryId}`, {
+      const response = await fetch(`${API_URL}/leaderboard/${entryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -909,7 +915,7 @@ const AdminPanel = () => {
         }
       };
 
-      const response = await fetch('http://localhost:5000/api/mentorship-plans', {
+      const response = await fetch(`${API_URL}/mentorship-plans`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -982,7 +988,7 @@ const AdminPanel = () => {
         }
       };
 
-      const response = await fetch(`http://localhost:5000/api/mentorship-plans/${editingMentorshipPlan._id}`, {
+      const response = await fetch(`${API_URL}/mentorship-plans/${editingMentorshipPlan._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1045,7 +1051,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/mentorship-plans/${planId}`, {
+      const response = await fetch(`${API_URL}/mentorship-plans/${planId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1077,7 +1083,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/mentorship-plans', {
+      const response = await fetch(`${API_URL}/mentorship-plans`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1115,7 +1121,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/mentorship-plans/subscriptions', {
+      const response = await fetch(`${API_URL}/mentorship-plans/subscriptions`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1159,7 +1165,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:5000/api/mentorship-chat/${planId}`, {
+      const response = await fetch(`${API_URL}/mentorship-chat/${planId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1182,7 +1188,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:5000/api/mentorship-chat/${selectedMentorshipSubscription.mentorshipPlan._id}`, {
+      const response = await fetch(`${API_URL}/mentorship-chat/${selectedMentorshipSubscription.mentorshipPlan._id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1251,7 +1257,7 @@ const AdminPanel = () => {
       // Combine date and time
       const sessionDateTime = new Date(`${sessionScheduleData.date}T${sessionScheduleData.time}`);
       
-      const response = await fetch(`http://localhost:5000/api/mentorship-plans/${selectedMentorshipSubscription.mentorshipPlan._id}/schedule-session`, {
+      const response = await fetch(`${API_URL}/mentorship-plans/${selectedMentorshipSubscription.mentorshipPlan._id}/schedule-session`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1353,7 +1359,7 @@ const AdminPanel = () => {
 
       const sessionDateTime = new Date(`${editSessionData.date}T${editSessionData.time}`);
       
-      const response = await fetch(`http://localhost:5000/api/mentorship-plans/${selectedMentorshipSubscription._id}/sessions/${editingSession._id}`, {
+      const response = await fetch(`${API_URL}/mentorship-plans/${selectedMentorshipSubscription._id}/sessions/${editingSession._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1418,7 +1424,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/mentorship-plans/${selectedMentorshipSubscription._id}/sessions/${session._id}`, {
+      const response = await fetch(`${API_URL}/mentorship-plans/${selectedMentorshipSubscription._id}/sessions/${session._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1461,7 +1467,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/youtube-videos/admin', {
+      const response = await fetch(`${API_URL}/youtube-videos/admin`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1495,7 +1501,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/footer-settings/admin', {
+      const response = await fetch(`${API_URL}/footer-settings/admin`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1533,7 +1539,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`http://localhost:5000/api/footer-settings/${footerSettings._id}`, {
+      const response = await fetch(`${API_URL}/footer-settings/${footerSettings._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1568,7 +1574,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://localhost:5000/api/visitors/stats', {
+      const response = await fetch(`${API_URL}/visitors/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1611,7 +1617,7 @@ const AdminPanel = () => {
         })
       };
 
-      const response = await fetch('http://localhost:5000/api/notifications/send', {
+      const response = await fetch(`${API_URL}/notifications/send`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1649,7 +1655,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+      const response = await fetch(`${API_URL}/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1689,7 +1695,7 @@ const AdminPanel = () => {
         console.log('Fetching dashboard stats...');
         
         // Fetch challenges data
-        const challengesResponse = await fetch('http://localhost:5000/api/challenges', {
+        const challengesResponse = await fetch(`${API_URL}/challenges`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1707,7 +1713,7 @@ const AdminPanel = () => {
         console.log('Challenges data:', challengesData);
         
         // Fetch users data
-        const usersResponse = await fetch('http://localhost:5000/api/users', {
+        const usersResponse = await fetch(`${API_URL}/users`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1939,7 +1945,7 @@ const AdminPanel = () => {
         }
       };
 
-      const response = await fetch('http://localhost:5000/api/signal-plans', {
+      const response = await fetch(`${API_URL}/signal-plans`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2024,7 +2030,7 @@ const AdminPanel = () => {
         }
       };
 
-      const response = await fetch(`http://localhost:5000/api/signal-plans/${editingSignalPlan._id}`, {
+      const response = await fetch(`${API_URL}/signal-plans/${editingSignalPlan._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2084,7 +2090,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/signal-plans/${planId}`, {
+      const response = await fetch(`${API_URL}/signal-plans/${planId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2143,7 +2149,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/youtube-videos', {
+      const response = await fetch(`${API_URL}/youtube-videos`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2203,7 +2209,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/youtube-videos/${editingYouTubeVideo._id}`, {
+      const response = await fetch(`${API_URL}/youtube-videos/${editingYouTubeVideo._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2248,7 +2254,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/youtube-videos/${videoId}`, {
+      const response = await fetch(`${API_URL}/youtube-videos/${videoId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2279,7 +2285,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/youtube-videos/${videoId}/toggle`, {
+      const response = await fetch(`${API_URL}/youtube-videos/${videoId}/toggle`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2312,7 +2318,7 @@ const AdminPanel = () => {
         throw new Error('No authentication token found');
       }
       
-      const response = await fetch('http://localhost:5000/api/prop-firm-packages', {
+      const response = await fetch(`${API_URL}/prop-firm-packages`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -2376,7 +2382,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/prop-firm-packages', {
+      const response = await fetch(`${API_URL}/prop-firm-packages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2460,7 +2466,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/prop-firm-packages/${packageId}`, {
+      const response = await fetch(`${API_URL}/prop-firm-packages/${packageId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2562,7 +2568,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/prop-firm-packages/${editingPropFirmPackage._id}`, {
+      const response = await fetch(`${API_URL}/prop-firm-packages/${editingPropFirmPackage._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2621,7 +2627,7 @@ const AdminPanel = () => {
       }
       
       console.log('Fetching prop firm services...');
-      const response = await fetch('http://localhost:5000/api/prop-firm-services', {
+      const response = await fetch(`${API_URL}/prop-firm-services`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -2675,7 +2681,7 @@ const AdminPanel = () => {
       if (supportFilters.category !== 'all') queryParams.append('category', supportFilters.category);
       if (supportFilters.assignedTo !== 'all') queryParams.append('assignedTo', supportFilters.assignedTo);
 
-      const response = await fetch(`http://localhost:5000/api/support?${queryParams.toString()}`, {
+      const response = await fetch(`${API_URL}/support?${queryParams.toString()}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2700,7 +2706,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:5000/api/support/stats/overview', {
+      const response = await fetch(`${API_URL}/support/stats/overview`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2720,7 +2726,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:5000/api/support/${ticketId}`, {
+      const response = await fetch(`${API_URL}/support/${ticketId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2749,7 +2755,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/support/${selectedTicket._id}/messages`, {
+      const response = await fetch(`${API_URL}/support/${selectedTicket._id}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2781,7 +2787,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/support/${ticketId}`, {
+      const response = await fetch(`${API_URL}/support/${ticketId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -2817,7 +2823,7 @@ const AdminPanel = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/support/${ticketId}`, {
+      const response = await fetch(`${API_URL}/support/${ticketId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -2934,7 +2940,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:5000/api/prop-firm-services/${serviceId}/chat`, {
+      const response = await fetch(`${API_URL}/prop-firm-services/${serviceId}/chat`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -2958,7 +2964,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:5000/api/prop-firm-services/${selectedServiceForChat._id}/chat`, {
+      const response = await fetch(`${API_URL}/prop-firm-services/${selectedServiceForChat._id}/chat`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -3194,7 +3200,7 @@ const AdminPanel = () => {
     
     
     try {
-      const response = await fetch('http://localhost:5000/api/challenges', {
+      const response = await fetch(`${API_URL}/challenges`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3323,7 +3329,7 @@ const AdminPanel = () => {
     
     
     try {
-      const response = await fetch(`http://localhost:5000/api/challenges/${editingChallenge._id}`, {
+      const response = await fetch(`${API_URL}/challenges/${editingChallenge._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -3360,7 +3366,7 @@ const AdminPanel = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/challenges/${challengeId}`, {
+      const response = await fetch(`${API_URL}/challenges/${challengeId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -3632,7 +3638,7 @@ const AdminPanel = () => {
                 {challengesLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map((i) => (
-                      <Card key={i} className="bg-white/5 backdrop-blur-md border-white/10">
+                      <Card key={i} className={getGlassCardClasses()}>
                         <CardContent className="p-6">
                           <div className="animate-pulse">
                             <div className="h-4 bg-gray-600 rounded mb-4"></div>
@@ -3644,7 +3650,7 @@ const AdminPanel = () => {
                     ))}
                   </div>
                 ) : getFilteredChallenges().length === 0 ? (
-                  <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                  <Card className={getGlassCardClasses()}>
                     <CardContent className="p-12 text-center">
                       <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-xl font-semibold text-gray-300 mb-2">
@@ -3671,7 +3677,7 @@ const AdminPanel = () => {
                     {getFilteredChallenges().map((challenge) => {
                       const status = getChallengeStatus(challenge.startDate, challenge.endDate, challenge.status);
                       return (
-                        <Card key={challenge._id} className="bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-all duration-300">
+                        <Card key={challenge._id} className={`${getGlassCardClasses('hover:bg-white/10 transition-all duration-300')}`}>
                           <CardContent className="p-6">
                             <div className="flex items-start justify-between mb-4">
                               <div className="flex-1">
@@ -6095,7 +6101,7 @@ const AdminPanel = () => {
       </style>
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" style={{ minHeight: '100vh' }}>
       {/* Mobile Header */}
-      <div className="md:hidden bg-white/5 backdrop-blur-md border-b border-white/10 p-4">
+      <div className={`md:hidden border-b p-4 ${getGlassCardClasses()}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button
@@ -6129,7 +6135,7 @@ const AdminPanel = () => {
           className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
           onClick={handleOverlayClick}
         >
-          <div className="bg-white/5 backdrop-blur-md border-r border-white/10 w-64 h-full p-4 overflow-y-auto">
+          <div className={`${getGlassCardClasses()} w-64 h-full p-4 overflow-y-auto`}>
             {/* Back to Home Button */}
             <Button
               variant="ghost"
@@ -6173,7 +6179,7 @@ const AdminPanel = () => {
 
       <div className="flex h-screen md:h-[calc(100vh-80px)] p-4">
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-64 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-2 ml-4 mt-4 h-fit min-h-[calc(100vh-120px)]">
+        <div className={`hidden md:block w-64 rounded-xl p-2 ml-4 mt-4 h-fit min-h-[calc(100vh-120px)] ${getGlassCardClasses()}`}>
           {/* Back to Home Button */}
           <Button
             variant="ghost"
@@ -6215,7 +6221,7 @@ const AdminPanel = () => {
         
         {/* Content Area */}
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <div className="max-w-6xl mx-auto bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 mr-0 mt-4">
+          <div className={`max-w-6xl mx-auto rounded-xl p-6 mr-0 mt-4 ${getGlassCardClasses()}`}>
             {renderContent()}
           </div>
         </div>
@@ -6224,7 +6230,7 @@ const AdminPanel = () => {
       {/* Create Challenge Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+          <div className={`${getGlassCardClasses()} w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide`}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">Create New Challenge</h2>
@@ -10501,7 +10507,7 @@ const AdminPanel = () => {
                         return;
                       }
 
-                      const response = await fetch(`http://localhost:5000/api/challenges/${selectedUser.competitionId || selectedCompetition}/participants/${selectedUser._id}`, {
+                      const response = await fetch(`${API_URL}/challenges/${selectedUser.competitionId || selectedCompetition}/participants/${selectedUser._id}`, {
                         method: 'PUT',
                         headers: {
                           'Authorization': `Bearer ${token}`,
