@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
+import ServiceGrid from "@/components/ServiceGrid";
 import StepsSection from "@/components/StepsSection";
 import MentorshipsSection from "@/components/MentorshipsSection";
 import YouTubeVideosSection from "@/components/YouTubeVideosSection";
@@ -11,9 +11,9 @@ const Index = () => {
   return (
     <div className="min-h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(230 35% 8%) 0%, hsl(250 45% 12%) 50%, hsl(230 35% 8%) 100%)' }}>
       <Header />
-      <HeroSection />
+      <ServiceGrid />
       <StepsSection />
-      {/* <MentorshipsSection /> - Hidden since mentorships are now shown in hero tabs */}
+      {/* <MentorshipsSection /> - Hidden since mentorships are now shown in service grid */}
       <YouTubeVideosSection />
       <NotificationsSection />
       <AdminTrustSection />

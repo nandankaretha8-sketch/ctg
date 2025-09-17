@@ -115,9 +115,26 @@ const ServiceGrid = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8">
-      {/* Grid Container */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/85" />
+      
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8">
+        {/* Hero Title */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <span className="gradient-text">Master Trading</span><br />
+            <span className="text-white">With Our Platform</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Choose from our comprehensive suite of trading services to accelerate your success
+          </p>
+        </div>
+
+        {/* Grid Container */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {services.map((service) => {
           const IconComponent = service.icon;
           return (
@@ -163,15 +180,16 @@ const ServiceGrid = () => {
             </div>
           );
         })}
-      </div>
+        </div>
 
-      {/* Description Text */}
-      <div className="text-center mt-8">
-        <p className="text-gray-400 text-sm md:text-base">
-          Tap any card above to get started with our trading services
-        </p>
+        {/* Description Text */}
+        <div className="text-center mt-8">
+          <p className="text-gray-400 text-sm md:text-base">
+            Tap any card above to get started with our trading services
+          </p>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
