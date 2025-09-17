@@ -120,6 +120,32 @@ const ServiceGrid = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
       <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/85" />
       
+      {/* 3D Brain Background */}
+      <div className="brain-container">
+        <div className="brain-3d">
+          {/* Brain Hemispheres */}
+          <div className="brain-hemisphere brain-left"></div>
+          <div className="brain-hemisphere brain-right"></div>
+          
+          {/* Brain Details */}
+          <div className="brain-detail brain-detail-1"></div>
+          <div className="brain-detail brain-detail-2"></div>
+          <div className="brain-detail brain-detail-3"></div>
+          <div className="brain-detail brain-detail-4"></div>
+          
+          {/* Neural Connections */}
+          <div className="neural-connection neural-connection-1"></div>
+          <div className="neural-connection neural-connection-2"></div>
+          <div className="neural-connection neural-connection-3"></div>
+          
+          {/* Neural Sparks */}
+          <div className="neural-spark neural-spark-1"></div>
+          <div className="neural-spark neural-spark-2"></div>
+          <div className="neural-spark neural-spark-3"></div>
+          <div className="neural-spark neural-spark-4"></div>
+        </div>
+      </div>
+      
       {/* Content */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8">
         {/* Hero Title */}
