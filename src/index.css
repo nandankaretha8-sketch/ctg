@@ -118,7 +118,7 @@
 @layer components {
   /* Glass Card Component */
   .glass-card {
-    @apply border border-solid rounded-xl;
+    @apply border border-solid;
     background: linear-gradient(135deg, hsl(var(--glass) / 0.8), hsl(var(--glass) / 0.4));
     border-color: hsl(var(--glass-border) / 0.3);
     box-shadow: var(--shadow-glass);
@@ -395,6 +395,34 @@
   }
 
   .glass-card-desktop:hover {
+    border-color: hsl(var(--glass-border) / 0.6);
+    box-shadow: var(--glow-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Admin Panel Specific Glass Cards with Rounded Corners */
+  .admin-glass-card {
+    @apply border border-solid rounded-xl;
+    background: linear-gradient(135deg, hsl(var(--glass) / 0.95), hsl(var(--glass) / 0.85));
+    border-color: hsl(var(--glass-border) / 0.3);
+    box-shadow: var(--shadow-glass);
+    transition: var(--transition-smooth);
+    
+    /* No backdrop blur for better mobile compatibility */
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    
+    /* Ensure proper rendering on mobile browsers */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    
+    /* Force solid background for admin panel */
+    background-color: hsl(var(--glass) / 0.95) !important;
+  }
+
+  .admin-glass-card:hover {
     border-color: hsl(var(--glass-border) / 0.6);
     box-shadow: var(--glow-primary);
     transform: translateY(-2px);

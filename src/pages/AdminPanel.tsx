@@ -175,10 +175,10 @@ const AdminPanel = () => {
   const [activeMenu, setActiveMenu] = useState('challenges');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Utility function to get responsive glass card classes
+  // Utility function to get admin panel glass card classes
   const getGlassCardClasses = (additionalClasses = '') => {
-    // Force mobile classes for better Safari compatibility
-    return `glass-card-mobile ${additionalClasses}`;
+    // Use admin-specific glass card class with rounded corners
+    return `admin-glass-card ${additionalClasses}`;
   };
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
