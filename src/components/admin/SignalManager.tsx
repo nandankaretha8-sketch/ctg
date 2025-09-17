@@ -270,44 +270,44 @@ const SignalManager = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-2rem)] lg:h-[600px] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-lg overflow-hidden">
+    <div className="h-[calc(100vh-2rem)] lg:h-[600px] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-lg overflow-hidden max-w-full mx-auto">
       {/* Mobile Layout */}
-      <div className="lg:hidden h-full flex flex-col">
+      <div className="lg:hidden h-full flex flex-col max-w-sm mx-auto">
         {/* Mobile Header with Dropdown */}
-        <div className="p-4 border-b border-white/10 bg-white/5">
+        <div className="p-3 border-b border-white/10 bg-white/5 flex-shrink-0">
           <div className="relative">
             <button
               onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
-              className="w-full flex items-center justify-between p-3 bg-white/10 border border-white/20 rounded-lg text-white"
+              className="w-full flex items-center justify-between p-2 bg-white/10 border border-white/20 rounded-lg text-white"
             >
-              <div className="flex items-center gap-3">
-                <MessageSquare className="h-5 w-5 text-blue-400" />
-                <div className="text-left">
-                  <div className="font-semibold">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-blue-400" />
+                <div className="text-left min-w-0 flex-1">
+                  <div className="font-semibold text-sm truncate">
                     {selectedPlan ? selectedPlan.name : 'Select Signal Plan'}
                   </div>
                   {selectedPlan && (
-                    <div className="text-xs text-gray-300 flex items-center gap-2">
+                    <div className="text-xs text-gray-300 flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      {selectedPlan.currentSubscribers} subscribers
+                      {selectedPlan.currentSubscribers} subs
                     </div>
                   )}
                 </div>
               </div>
-              <ChevronDown className={`h-4 w-4 transition-transform ${isMobileDropdownOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-4 w-4 transition-transform flex-shrink-0 ${isMobileDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             
             {/* Dropdown Menu */}
             {isMobileDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-                <div className="p-2">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                <div className="p-1">
                   {loadingPlans ? (
-                    <div className="flex items-center justify-center py-4">
+                    <div className="flex items-center justify-center py-3">
                       <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
-                      <span className="ml-2 text-gray-300 text-sm">Loading...</span>
+                      <span className="ml-2 text-gray-300 text-xs">Loading...</span>
                     </div>
                   ) : filteredPlans.length === 0 ? (
-                    <div className="text-center py-4 text-gray-400 text-sm">
+                    <div className="text-center py-3 text-gray-400 text-xs">
                       No signal plans found
                     </div>
                   ) : (
@@ -318,7 +318,7 @@ const SignalManager = () => {
                           setSelectedPlan(plan);
                           setIsMobileDropdownOpen(false);
                         }}
-                        className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
+                        className={`w-full text-left p-2 rounded-lg transition-all duration-200 ${
                           selectedPlan?._id === plan._id
                             ? 'bg-blue-500/20 border border-blue-500/30'
                             : 'bg-white/5 hover:bg-white/10 border border-transparent'
@@ -326,14 +326,14 @@ const SignalManager = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-white truncate text-sm">{plan.name}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                            <h3 className="font-semibold text-white truncate text-xs">{plan.name}</h3>
+                            <div className="flex items-center gap-1 mt-1">
+                              <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-1 py-0">
                                 <Users className="h-2 w-2 mr-1" />
                                 {plan.currentSubscribers}
                               </Badge>
                               {plan.currentSubscribers > 0 && (
-                                <Badge variant="outline" className="border-blue-500/30 text-blue-300 text-xs">
+                                <Badge variant="outline" className="border-blue-500/30 text-blue-300 text-xs px-1 py-0">
                                   Active
                                 </Badge>
                               )}
@@ -350,27 +350,27 @@ const SignalManager = () => {
         </div>
 
         {/* Mobile Chat Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col relative">
           {selectedPlan ? (
             <>
               {/* Chat Header */}
-              <div className="p-3 border-b border-white/10 bg-white/5">
+              <div className="p-2 border-b border-white/10 bg-white/5 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2 py-1">
                       <Zap className="h-3 w-3 mr-1" />
                       Live
                     </Badge>
                     <span className="text-xs text-gray-300 flex items-center gap-1">
                       <MessageCircle className="h-3 w-3" />
-                      {messages.length} messages
+                      {messages.length} msgs
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Messages Area */}
-              <div className="flex-1 p-3 overflow-y-auto">
+              {/* Messages Area - with bottom padding for fixed input */}
+              <div className="flex-1 p-3 pb-32 overflow-y-auto">
                 {loadingMessages ? (
                   <div className="flex items-center justify-center h-full">
                     <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
@@ -436,39 +436,49 @@ const SignalManager = () => {
                 )}
               </div>
 
-              {/* Message Input */}
-              <div className="p-3 pb-6 border-t border-white/10 bg-white/5">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="isScheduled"
-                      checked={formData.isScheduled}
-                      onCheckedChange={handleCheckboxChange}
-                      className="border-white/30 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white"
-                    />
-                    <Label htmlFor="isScheduled" className="text-gray-300 flex items-center gap-2 text-xs">
-                      <Clock className="h-3 w-3" /> Schedule Signal
-                    </Label>
+              {/* Fixed Message Input at Bottom */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-white/5 backdrop-blur-md">
+                <div className="space-y-2">
+                  {/* Schedule Toggle - Always Visible */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="isScheduled"
+                        checked={formData.isScheduled}
+                        onCheckedChange={handleCheckboxChange}
+                        className="border-white/30 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white"
+                      />
+                      <Label htmlFor="isScheduled" className="text-gray-300 flex items-center gap-2 text-xs">
+                        <Clock className="h-3 w-3" /> Schedule
+                      </Label>
+                    </div>
+                    {formData.isScheduled && (
+                      <div className="text-xs text-blue-300">
+                        {formData.scheduledTime ? new Date(formData.scheduledTime).toLocaleString() : 'Set time'}
+                      </div>
+                    )}
                   </div>
 
+                  {/* Schedule Time Input - Show when scheduled */}
                   {formData.isScheduled && (
                     <Input
                       name="scheduledTime"
                       type="datetime-local"
                       value={formData.scheduledTime}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/20 text-white text-sm"
+                      className="bg-white/10 border-white/20 text-white text-xs w-full"
                       placeholder="Scheduled Time (UTC)"
                     />
                   )}
 
-                  <div className="flex gap-3">
+                  {/* Message Input and Send Button */}
+                  <div className="flex gap-2">
                     <Textarea
                       name="message"
                       value={formData.message}
                       onChange={handleInputChange}
-                      placeholder="Type your signal message here..."
-                      className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400 min-h-[80px] resize-none text-sm"
+                      placeholder="Type signal message..."
+                      className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400 min-h-[60px] max-h-[100px] resize-none text-sm"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -479,7 +489,7 @@ const SignalManager = () => {
                     <Button
                       onClick={handleSendSignal}
                       disabled={sendingSignal || !formData.message.trim()}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold px-4 py-3 min-h-[80px]"
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold px-3 py-2 min-h-[60px] flex-shrink-0"
                     >
                       {sendingSignal ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
