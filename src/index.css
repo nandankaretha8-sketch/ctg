@@ -118,7 +118,7 @@
 @layer components {
   /* Glass Card Component */
   .glass-card {
-    @apply border border-solid;
+    @apply border border-solid rounded-xl;
     background: linear-gradient(135deg, hsl(var(--glass) / 0.8), hsl(var(--glass) / 0.4));
     border-color: hsl(var(--glass-border) / 0.3);
     box-shadow: var(--shadow-glass);
@@ -355,7 +355,7 @@
 
   /* Mobile-optimized glass cards for admin panel */
   .glass-card-mobile {
-    @apply border border-solid;
+    @apply border border-solid rounded-xl;
     background: linear-gradient(135deg, hsl(var(--glass) / 0.95), hsl(var(--glass) / 0.85));
     border-color: hsl(var(--glass-border) / 0.3);
     box-shadow: var(--shadow-glass);
@@ -383,7 +383,7 @@
 
   /* Desktop glass cards with backdrop blur */
   .glass-card-desktop {
-    @apply border border-solid;
+    @apply border border-solid rounded-xl;
     background: linear-gradient(135deg, hsl(var(--glass) / 0.8), hsl(var(--glass) / 0.4));
     border-color: hsl(var(--glass-border) / 0.3);
     box-shadow: var(--shadow-glass);
