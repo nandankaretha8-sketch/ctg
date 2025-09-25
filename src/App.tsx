@@ -125,7 +125,11 @@ const App = () => (
               <Route path="/admin/payment-verification" element={<AdminPaymentVerification />} />
               <Route path="/admin/crypto-wallets" element={<AdminCryptoWallets />} />
               <Route path="/support" element={<Support />} />
-              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/admin" element={
+                <ErrorBoundary>
+                  <AdminPanel />
+                </ErrorBoundary>
+              } />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />

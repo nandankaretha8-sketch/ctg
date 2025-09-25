@@ -7,6 +7,8 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Lazy load admin components for better performance
 const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard'));
+const UserManagement = lazy(() => import('@/components/admin/UserManagement'));
+const ChallengeManagement = lazy(() => import('@/components/admin/ChallengeManagement'));
 const SettingsPanel = lazy(() => import('@/components/SettingsPanel'));
 const AdminPaymentVerification = lazy(() => import('./AdminPaymentVerification'));
 const AdminCryptoWallets = lazy(() => import('./AdminCryptoWallets'));
@@ -47,7 +49,11 @@ const AdminPanel = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <AdminDashboard />;
+        return <AdminDashboard onNavigate={setActiveSection} />;
+      case 'users':
+        return <UserManagement />;
+      case 'challenges':
+        return <ChallengeManagement />;
       case 'payments':
         return <AdminPaymentVerification />;
       case 'crypto':

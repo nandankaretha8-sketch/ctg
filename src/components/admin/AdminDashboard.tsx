@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Users, Trophy, BarChart3, DollarSign, TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, BarChart3, DollarSign, TrendingUp, Clock, CheckCircle, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { API_URL, authenticatedApiCall } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -18,7 +18,11 @@ interface AdminStats {
   activeSubscriptions: number;
 }
 
-const AdminDashboard = () => {
+interface AdminDashboardProps {
+  onNavigate?: (section: string) => void;
+}
+
+const AdminDashboard = ({ onNavigate }: AdminDashboardProps) => {
   const { user } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -172,7 +176,10 @@ const AdminDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => onNavigate?.('analytics')}
+              >
                 View Analytics
               </Button>
             </CardContent>
@@ -189,7 +196,10 @@ const AdminDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full bg-green-600 hover:bg-green-700">
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700"
+                onClick={() => onNavigate?.('users')}
+              >
                 Manage Users
               </Button>
             </CardContent>
@@ -206,7 +216,10 @@ const AdminDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full bg-purple-600 hover:bg-purple-700">
+              <Button 
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={() => onNavigate?.('settings')}
+              >
                 Open Settings
               </Button>
             </CardContent>
