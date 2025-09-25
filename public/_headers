@@ -1,0 +1,65 @@
+# CDN Headers for Cloudflare/Vercel
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Static Assets - Long Cache
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
+# CSS Files
+*.css
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: text/css
+
+# JavaScript Files
+*.js
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/javascript
+
+# Images
+*.png
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/png
+
+*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/jpeg
+
+*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/jpeg
+
+*.gif
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/gif
+
+*.svg
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/svg+xml
+
+*.ico
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/x-icon
+
+# Fonts
+*.woff
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+# HTML Files - Short Cache
+*.html
+  Cache-Control: public, max-age=300
+  X-Content-Type-Options: nosniff
+
+# Service Worker
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+  Service-Worker-Allowed: /

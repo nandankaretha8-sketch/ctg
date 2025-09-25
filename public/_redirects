@@ -1,0 +1,8 @@
+# CDN Redirects for SPA
+/*    /index.html   200
+
+# API Proxy (if needed)
+/api/*  https://ctg-server-metknjpf4-nandankarethas-projects.vercel.app/api/:splat  200
+
+# Static Assets
+/assets/*  /assets/:splat  200
