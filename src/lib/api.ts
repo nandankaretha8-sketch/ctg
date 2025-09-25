@@ -7,7 +7,7 @@ const getApiBaseUrl = (): string => {
   }
   
   // Fallback to production backend URL
-  return 'https://ctg-server-otpwjdey6-nandankarethas-projects.vercel.app';
+  return 'https://ctg-server-5x6s4jqe4-nandankarethas-projects.vercel.app';
 };
 
 const getApiUrl = (): string => {
