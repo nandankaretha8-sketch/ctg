@@ -189,13 +189,6 @@ const AdminPanel = () => {
   const [challenges, setChallenges] = useState<any[]>([]);
   const [challengesLoading, setChallengesLoading] = useState(false);
 
-  // Debug: Monitor challenges state changes
-  useEffect(() => {
-    console.log('Challenges state updated:', challenges);
-    if (challenges.length > 0) {
-      console.log('First challenge in state:', challenges[0]);
-    }
-  }, [challenges]);
   const [challengeStatusFilter, setChallengeStatusFilter] = useState('all');
   const [users, setUsers] = useState<any[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -478,8 +471,6 @@ const AdminPanel = () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log('Setting challenges data:', data.data);
-        console.log('First challenge:', data.data[0]);
         setChallenges(data.data);
       }
     } catch (error) {
@@ -1072,13 +1063,6 @@ const AdminPanel = () => {
       const data = await response.json();
       
       if (data.success && Array.isArray(data.data)) {
-        console.log('Mentorship plans fetched:', data.data.length);
-        console.log('Plan data:', data.data.map(plan => ({
-          id: plan._id,
-          name: plan.name || 'NO NAME',
-          hasMetadata: !!plan.metadata,
-          mentorName: plan.metadata?.mentorName || 'NO MENTOR'
-        })));
         setMentorshipPlans(data.data);
       } else {
         // Error:Invalid mentorship plans data format:', data);
@@ -1116,16 +1100,6 @@ const AdminPanel = () => {
       const data = await response.json();
       
       if (data.success && Array.isArray(data.data)) {
-        console.log('Mentorship subscriptions fetched:', data.data.length);
-        console.log('Subscription data:', data.data.map(sub => ({
-          id: sub._id,
-          hasMentorshipPlan: !!sub.mentorshipPlan,
-          planName: sub.mentorshipPlan?.name || 'NO PLAN',
-          hasUser: !!sub.user,
-          userName: sub.user?.firstName || 'NO USER',
-          hasMetadata: !!sub.mentorshipPlan?.metadata,
-          mentorName: sub.mentorshipPlan?.metadata?.mentorName || 'NO MENTOR'
-        })));
         setMentorshipSubscriptions(data.data);
       } else {
         // Error:Invalid mentorship subscriptions data format:', data);
@@ -2618,23 +2592,13 @@ const AdminPanel = () => {
   const fetchSupportTickets = async () => {
     try {
       setSupportLoading(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Authentication required');
-        return;
-      }
-
       const queryParams = new URLSearchParams();
       if (supportFilters.status !== 'all') queryParams.append('status', supportFilters.status);
       if (supportFilters.priority !== 'all') queryParams.append('priority', supportFilters.priority);
       if (supportFilters.category !== 'all') queryParams.append('category', supportFilters.category);
       if (supportFilters.assignedTo !== 'all') queryParams.append('assignedTo', supportFilters.assignedTo);
 
-      const response = await fetch(`${API_URL}/support?${queryParams.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await authenticatedApiCall(`/support?${queryParams.toString()}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -2652,14 +2616,7 @@ const AdminPanel = () => {
 
   const fetchSupportStats = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch(`${API_URL}/support/stats/overview`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await authenticatedApiCall('/support/stats/overview');
 
       if (response.ok) {
         const data = await response.json();
@@ -2672,14 +2629,7 @@ const AdminPanel = () => {
 
   const fetchTicketDetails = async (ticketId: string) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch(`${API_URL}/support/${ticketId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await authenticatedApiCall(`/support/${ticketId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -2698,18 +2648,8 @@ const AdminPanel = () => {
 
     setSendingMessage(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Authentication required');
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/support/${selectedTicket._id}/messages`, {
+      const response = await authenticatedApiCall(`/support/${selectedTicket._id}/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({ message: supportMessage })
       });
 
@@ -2730,18 +2670,8 @@ const AdminPanel = () => {
 
   const updateTicketStatus = async (ticketId: string, status: string) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Authentication required');
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/support/${ticketId}`, {
+      const response = await authenticatedApiCall(`/support/${ticketId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({ status })
       });
 
@@ -2766,17 +2696,8 @@ const AdminPanel = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Authentication required');
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/support/${ticketId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await authenticatedApiCall(`/support/${ticketId}`, {
+        method: 'DELETE'
       });
 
       if (response.ok) {
@@ -3211,7 +3132,6 @@ const AdminPanel = () => {
       maxDrawdown: challenge.requirements?.maxDrawdown?.toString() || '10'
     };
     
-    console.log('Setting form data for editing:', formDataToSet);
     setFormData(formDataToSet);
     
     setChallengeMode(challenge.challengeMode || 'target');
@@ -3247,7 +3167,6 @@ const AdminPanel = () => {
 
     setLoading(true);
     
-    console.log('Form data before building request:', formData);
     
     const updateRequestBody = {
       name: formData.name,
@@ -3278,7 +3197,6 @@ const AdminPanel = () => {
       rules: rules.filter(rule => rule.trim() !== '')
     };
     
-    console.log('Built update request body:', updateRequestBody);
     
     
     try {
@@ -3301,7 +3219,6 @@ const AdminPanel = () => {
         await fetchChallenges();
         // Force a small re-render to ensure UI updates
         setTimeout(() => {
-          console.log('Forcing UI refresh...');
           window.dispatchEvent(new Event('resize'));
         }, 100);
       } else {
@@ -3648,7 +3565,6 @@ const AdminPanel = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {getFilteredChallenges().map((challenge) => {
                       const status = getChallengeStatus(challenge.startDate, challenge.endDate, challenge.status);
-                      console.log('Rendering challenge:', challenge.name, 'with ID:', challenge._id);
                       return (
                         <Card key={challenge._id} className={`${getGlassCardClasses('hover:bg-white/10 transition-all duration-300')}`}>
                           <CardContent className="p-6">

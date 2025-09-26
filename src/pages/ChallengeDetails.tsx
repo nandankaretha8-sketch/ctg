@@ -492,9 +492,9 @@ const ChallengeDetails = () => {
         {/* Header */}
         <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 lg:mb-8">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => navigate('/challenges')}
-            className="text-white hover:bg-white/10 text-sm sm:text-base"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 text-sm sm:text-base"
           >
             <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Back to Challenges</span>

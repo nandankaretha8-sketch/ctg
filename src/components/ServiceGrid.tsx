@@ -164,8 +164,7 @@ const ServiceGrid = () => {
         {/* Hero Title */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            <span className="gradient-text">Master Trading</span><br />
-            <span className="text-white">With CTG</span>
+            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Master Trading With CTG Academy</span>
           </h1>
         </div>
 

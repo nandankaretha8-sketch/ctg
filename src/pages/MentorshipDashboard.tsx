@@ -94,20 +94,16 @@ const MentorshipDashboard = () => {
   const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
-    console.log('MentorshipDashboard useEffect triggered:', { planId, user });
     if (planId && user) {
       fetchMentorshipData();
       fetchChatMessages();
     } else {
-      console.log('Missing planId or user:', { planId, user });
       setLoading(false);
     }
   }, [planId, user]);
 
   const fetchMentorshipData = async () => {
     try {
-      console.log('Fetching mentorship data for planId:', planId);
-      console.log('API_URL:', API_URL);
       
       // Fetch mentorship plan details
       const planResponse = await fetch(`${API_URL}/mentorship-plans/${planId}`, {
@@ -116,38 +112,30 @@ const MentorshipDashboard = () => {
         }
       });
       
-      console.log('Plan response status:', planResponse.status);
       
       if (planResponse.ok) {
         const planData = await planResponse.json();
-        console.log('Plan data received:', planData);
         setPlan(planData.data);
       } else {
         console.error('Failed to fetch plan data:', planResponse.status, planResponse.statusText);
       }
 
       // Fetch user's subscription
-      console.log('Fetching user subscriptions...');
       const subscriptionResponse = await fetch(`${API_URL}/mentorship-plans/user/subscriptions`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       
-      console.log('Subscription response status:', subscriptionResponse.status);
       
       if (subscriptionResponse.ok) {
         const subscriptionData = await subscriptionResponse.json();
-        console.log('Subscription data received:', subscriptionData);
-        console.log('Looking for planId:', planId);
         
         // Look for any subscription to this plan (active or not)
         const userSubscription = subscriptionData.data.find((sub: any) => {
-          console.log('Checking subscription:', sub.mentorshipPlan?._id, 'against planId:', planId);
           return sub.mentorshipPlan?._id === planId;
         });
         
-        console.log('Found user subscription:', userSubscription);
         setSubscription(userSubscription);
       } else {
         console.error('Failed to fetch subscription data:', subscriptionResponse.status, subscriptionResponse.statusText);

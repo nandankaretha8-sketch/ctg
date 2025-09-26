@@ -50,6 +50,12 @@ const SignalPlanDetails = () => {
   const { id: planId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  console.log('🔍 [DEBUG] SignalPlanDetails - planId from useParams:', planId);
+  console.log('🔍 [DEBUG] SignalPlanDetails - planId type:', typeof planId);
+  console.log('🔍 [DEBUG] SignalPlanDetails - planId length:', planId?.length);
+  console.log('🔍 [DEBUG] SignalPlanDetails - planId isEmpty:', !planId || planId.trim() === '');
+  
   const { paymentStatus, loading: paymentLoading } = usePaymentStatus('signal_plan', planId || '');
   
   const [plan, setPlan] = useState<SignalPlan | null>(null);
@@ -63,21 +69,41 @@ const SignalPlanDetails = () => {
   }, [planId]);
 
   const fetchSignalPlan = async () => {
+    console.log('🔍 [DEBUG] SignalPlanDetails - fetchSignalPlan called');
+    console.log('🔍 [DEBUG] SignalPlanDetails - planId:', planId);
+    console.log('🔍 [DEBUG] SignalPlanDetails - API_URL:', API_URL);
+    
+    if (!planId || planId.trim() === '') {
+      console.warn('🔍 [DEBUG] SignalPlanDetails - ⚠️ planId is empty or undefined, skipping API call');
+      toast.error('Invalid plan ID');
+      navigate('/signal-plans');
+      return;
+    }
+    
     try {
-      const response = await fetch(`${API_URL}/signal-plans/${planId}`, {
+      const url = `${API_URL}/signal-plans/${planId}`;
+      console.log('🔍 [DEBUG] SignalPlanDetails - Making API call to:', url);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       
+      console.log('🔍 [DEBUG] SignalPlanDetails - Response status:', response.status);
+      console.log('🔍 [DEBUG] SignalPlanDetails - Response ok:', response.ok);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 [DEBUG] SignalPlanDetails - API response data:', data);
         setPlan(data.data);
       } else {
+        console.error('🔍 [DEBUG] SignalPlanDetails - API error response:', response.status);
         toast.error('Failed to fetch signal plan details');
         navigate('/signal-plans');
       }
     } catch (error) {
+      console.error('🔍 [DEBUG] SignalPlanDetails - Error fetching signal plan:', error);
       toast.error('Failed to fetch signal plan details');
       navigate('/signal-plans');
     } finally {

@@ -6,14 +6,24 @@ const getApiBaseUrl = (): string => {
     return import.meta.env.VITE_API_BASE_URL.trim();
   }
   
-  // Fallback to production backend URL
-  return 'https://ctg-server-5x6s4jqe4-nandankarethas-projects.vercel.app';
+  // Use production backend URL for production builds
+  if (import.meta.env.PROD) {
+    return 'https://ctg-server.vercel.app';
+  }
+  
+  // Use local backend for development
+  return 'http://localhost:5000';
 };
 
 const getApiUrl = (): string => {
   // Check for full API URL first
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL.trim();
+  }
+  
+  // Use production API URL for production builds
+  if (import.meta.env.PROD) {
+    return 'https://ctg-server.vercel.app/api';
   }
   
   // Construct from base URL
@@ -75,7 +85,6 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
       }
     };
     
-    console.log('Making API call:', { url, method: finalOptions.method, body: finalOptions.body });
     
     const response = await fetch(url, finalOptions);
     
@@ -132,7 +141,6 @@ export const authenticatedApiCall = async (endpoint: string, options: RequestIni
 
   // If we get a 403 error, it might be a CSRF token issue, so retry once with fresh token
   if (response.status === 403 && options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase())) {
-    console.log('CSRF token might be expired, retrying with fresh token...');
     
     // Get fresh CSRF token and retry
     const freshToken = await getCSRFToken();

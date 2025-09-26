@@ -36,18 +36,18 @@ const Header = () => {
               {settings.logo ? (
                 <img 
                   src={settings.logo} 
-                  alt={settings.siteName || "CTG"} 
+                  alt={settings.siteName || "CTG Academy"} 
                   className="h-10 w-auto object-contain"
                 />
               ) : (
                 <img 
                   src="/icon.svg" 
-                  alt={settings.siteName || "CTG"} 
+                  alt={settings.siteName || "CTG Academy"} 
                   className="h-10 w-10 object-contain"
                 />
               )}
               <span className="text-2xl font-bold gradient-text">
-                {settings.siteName || "CTG"}
+                {settings.siteName || "CTG Academy"}
               </span>
             </div>
           </div>

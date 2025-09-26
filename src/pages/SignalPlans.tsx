@@ -67,8 +67,17 @@ const SignalPlans = () => {
   }, [user]);
 
   useEffect(() => {
+    console.log('🔍 [DEBUG] useEffect triggered - plans, user changed');
+    console.log('🔍 [DEBUG] Plans length:', plans.length);
+    console.log('🔍 [DEBUG] User exists:', !!user);
+    console.log('🔍 [DEBUG] User token exists:', !!user?.token);
+    console.log('🔍 [DEBUG] Current plans:', plans);
+    
     if (plans.length > 0 && user && user.token) {
+      console.log('🔍 [DEBUG] Conditions met, calling checkAllPaymentStatuses...');
       checkAllPaymentStatuses();
+    } else {
+      console.log('🔍 [DEBUG] Conditions not met, skipping checkAllPaymentStatuses');
     }
   }, [plans, user]);
 
@@ -81,48 +90,116 @@ const SignalPlans = () => {
   }, [paymentStatuses]);
 
   const checkAllPaymentStatuses = async () => {
+    console.log('🔍 [DEBUG] Starting checkAllPaymentStatuses...');
+    console.log('🔍 [DEBUG] Plans to check:', plans);
+    console.log('🔍 [DEBUG] Plans count:', plans.length);
+    
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      console.log('🔍 [DEBUG] No token found, skipping payment status check');
+      return;
+    }
+    
     const newStatuses: Record<string, { status: string; loading: boolean }> = { ...paymentStatuses };
+    
+    // Log each plan before processing
     for (const plan of plans) {
+      console.log(`🔍 [DEBUG] Processing plan for payment status:`, {
+        _id: plan._id,
+        name: plan.name,
+        idType: typeof plan._id,
+        idLength: plan._id?.length,
+        isEmpty: !plan._id || plan._id.trim() === ''
+      });
+      
+      if (!plan._id || plan._id.trim() === '') {
+        console.warn('🔍 [DEBUG] ⚠️ SKIPPING plan with invalid ID:', plan);
+        continue;
+      }
+      
       newStatuses[plan._id] = { status: newStatuses[plan._id]?.status || 'loading', loading: true };
     }
+    
     setPaymentStatuses({ ...newStatuses });
 
     await Promise.all(plans.map(async (plan) => {
+      console.log(`🔍 [DEBUG] Making API call for plan:`, {
+        _id: plan._id,
+        name: plan.name,
+        url: `${API_URL}/manual-payments/status/signal_plan/${plan._id}`
+      });
+      
+      if (!plan._id || plan._id.trim() === '') {
+        console.warn('🔍 [DEBUG] ⚠️ SKIPPING API call for plan with invalid ID:', plan);
+        return;
+      }
+      
       try {
         const res = await fetch(`${API_URL}/manual-payments/status/signal_plan/${plan._id}`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
+        console.log(`🔍 [DEBUG] API response for plan ${plan._id}:`, res.status, res.ok);
+        
         const data = await res.json();
+        console.log(`🔍 [DEBUG] API data for plan ${plan._id}:`, data);
+        
         if (data.success) {
           newStatuses[plan._id] = { status: data.data?.status || 'none', loading: false };
         } else {
           newStatuses[plan._id] = { status: 'none', loading: false };
         }
       } catch (e) {
+        console.error(`🔍 [DEBUG] Error for plan ${plan._id}:`, e);
         newStatuses[plan._id] = { status: 'none', loading: false };
       }
     }));
 
+    console.log('🔍 [DEBUG] Final payment statuses:', newStatuses);
     setPaymentStatuses({ ...newStatuses });
   };
 
   const fetchSignalPlans = async () => {
     try {
+      console.log('🔍 [DEBUG] Starting fetchSignalPlans...');
+      console.log('🔍 [DEBUG] API_URL:', API_URL);
+      console.log('🔍 [DEBUG] Token exists:', !!localStorage.getItem('token'));
+      
       const response = await fetch(`${API_URL}/signal-plans`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       
+      console.log('🔍 [DEBUG] Response status:', response.status);
+      console.log('🔍 [DEBUG] Response ok:', response.ok);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 [DEBUG] Raw API response:', data);
+        console.log('🔍 [DEBUG] Plans data:', data.data);
+        console.log('🔍 [DEBUG] Plans count:', data.data?.length || 0);
+        
+        // Log each plan's ID for debugging
+        if (data.data && Array.isArray(data.data)) {
+          data.data.forEach((plan: any, index: number) => {
+            console.log(`🔍 [DEBUG] Plan ${index}:`, {
+              _id: plan._id,
+              name: plan.name,
+              idType: typeof plan._id,
+              idLength: plan._id?.length,
+              isEmpty: !plan._id || plan._id.trim() === ''
+            });
+          });
+        }
+        
         setPlans(data.data || []);
       } else {
+        const errorText = await response.text();
+        console.error('🔍 [DEBUG] API Error Response:', errorText);
         toast.error('Failed to fetch signal plans');
       }
     } catch (error) {
+      console.error('🔍 [DEBUG] Error fetching signal plans:', error);
       toast.error('Failed to fetch signal plans');
     } finally {
       setLoading(false);

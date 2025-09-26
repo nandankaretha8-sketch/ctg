@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { API_URL } from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useAuthenticatedQuery } from "@/hooks/useApiQuery";
+import { useTabBasedQuery } from "@/hooks/useConditionalQuery";
 import { 
   BarChart3, 
   Trophy, 
@@ -99,19 +100,21 @@ interface PropFirmServiceData {
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
   
-  // Use React Query for data fetching with optimized caching
+  // Only load data when user clicks on specific tabs
   const { 
     data: challengesData, 
     isLoading: challengesLoading, 
     error: challengesError 
-  } = useAuthenticatedQuery<{ data: Challenge[] }>(
+  } = useTabBasedQuery<{ data: Challenge[] }>(
     ['user-challenges'],
     '/challenges/user/my-challenges',
+    activeTab,
+    'challenges',
     { 
-      enabled: !!user,
-      staleTime: 10 * 1000, // 10 seconds for ultra-fast updates
-      gcTime: 2 * 60 * 1000, // 2 minutes cache
+      staleTime: 10 * 1000,
+      gcTime: 2 * 60 * 1000,
     }
   );
 
@@ -119,13 +122,14 @@ const Dashboard = () => {
     data: signalData, 
     isLoading: signalLoading, 
     error: signalError 
-  } = useAuthenticatedQuery<{ data: UserSubscription[] }>(
+  } = useTabBasedQuery<{ data: UserSubscription[] }>(
     ['signal-subscriptions'],
     '/signal-plans/user/subscriptions',
+    activeTab,
+    'signals',
     { 
-      enabled: !!user,
-      staleTime: 5 * 1000, // 5 seconds for ultra-fast updates
-      gcTime: 1 * 60 * 1000, // 1 minute cache
+      staleTime: 5 * 1000,
+      gcTime: 1 * 60 * 1000,
     }
   );
 
@@ -133,13 +137,14 @@ const Dashboard = () => {
     data: mentorshipData, 
     isLoading: mentorshipLoading, 
     error: mentorshipError 
-  } = useAuthenticatedQuery<{ data: UserSubscription[] }>(
+  } = useTabBasedQuery<{ data: UserSubscription[] }>(
     ['mentorship-subscriptions'],
     '/mentorship-plans/user/subscriptions',
+    activeTab,
+    'mentorships',
     { 
-      enabled: !!user,
-      staleTime: 5 * 1000, // 5 seconds for ultra-fast updates
-      gcTime: 1 * 60 * 1000, // 1 minute cache
+      staleTime: 5 * 1000,
+      gcTime: 1 * 60 * 1000,
     }
   );
 
@@ -147,13 +152,14 @@ const Dashboard = () => {
     data: propFirmData, 
     isLoading: propFirmLoading, 
     error: propFirmError 
-  } = useAuthenticatedQuery<{ data: PropFirmServiceData[] }>(
+  } = useTabBasedQuery<{ data: PropFirmServiceData[] }>(
     ['prop-firm-services'],
     '/prop-firm-services/my-services',
+    activeTab,
+    'prop-firms',
     { 
-      enabled: !!user,
-      staleTime: 10 * 1000, // 10 seconds for ultra-fast updates
-      gcTime: 2 * 60 * 1000, // 2 minutes cache
+      staleTime: 10 * 1000,
+      gcTime: 2 * 60 * 1000,
     }
   );
 
@@ -265,305 +271,390 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-white/5 backdrop-blur-md border-white/10">
-            <CardContent className="p-4 text-center">
-              <Target className="h-6 w-6 text-purple-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-white">{userChallenges.length}</div>
-              <div className="text-xs text-gray-400">Competitions</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/5 backdrop-blur-md border-white/10">
-            <CardContent className="p-4 text-center">
-              <Rocket className="h-6 w-6 text-orange-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-white">{signalSubscriptions.length}</div>
-              <div className="text-xs text-gray-400">Signal Plans</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/5 backdrop-blur-md border-white/10">
-            <CardContent className="p-4 text-center">
-              <Users className="h-6 w-6 text-blue-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-white">{mentorshipSubscriptions.length}</div>
-              <div className="text-xs text-gray-400">Mentorships</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/5 backdrop-blur-md border-white/10">
-            <CardContent className="p-4 text-center">
-              <CheckCircle className="h-6 w-6 text-green-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-white">{propFirmServices.length}</div>
-              <div className="text-xs text-gray-400">Prop Services</div>
-            </CardContent>
-          </Card>
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <Button
+            variant={activeTab === 'overview' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('overview')}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+          >
+            Overview
+          </Button>
+          <Button
+            variant={activeTab === 'challenges' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('challenges')}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+          >
+            Challenges
+          </Button>
+          <Button
+            variant={activeTab === 'signals' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('signals')}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+          >
+            Signals
+          </Button>
+          <Button
+            variant={activeTab === 'mentorships' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('mentorships')}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+          >
+            Mentorships
+          </Button>
+          <Button
+            variant={activeTab === 'prop-firms' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('prop-firms')}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+          >
+            Prop Firms
+          </Button>
         </div>
 
-        {/* Push Notification Status */}
-        <PushNotificationStatus />
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
-          {/* Left Column */}
-          <div className="space-y-6">
-            
-            {/* My Competitions */}
-            <Card className="bg-white/5 backdrop-blur-md border-white/10">
-              <CardHeader className="p-6">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-xl flex items-center">
-                    <Trophy className="h-6 w-6 mr-3 text-purple-400" />
-                    My Competitions
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/challenges')}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
-                  >
-                    View All
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 pt-0">
-                {userChallenges.length > 0 ? (
-                  <div className="space-y-4">
-                    {userChallenges.slice(0, 3).map((challenge) => (
-                      <div key={challenge._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="text-white font-medium">{challenge.name}</h4>
-                          <p className="text-gray-400 text-sm">{formatDate(challenge.startDate)} - {formatDate(challenge.endDate)}</p>
-                        </div>
-                        <Badge className={getStatusColor(challenge.status)}>
-                          {challenge.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-4">No competitions joined yet</p>
-                    <Button
-                      onClick={() => navigate('/challenges')}
-                      className="bg-gradient-to-r from-purple-600 to-purple-900 hover:from-purple-700 hover:to-purple-950"
-                    >
-                      Join Competition
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Signal Plans */}
-            <Card className="bg-white/5 backdrop-blur-md border-white/10">
-              <CardHeader className="p-6">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-xl flex items-center">
-                    <Rocket className="h-6 w-6 mr-3 text-purple-500" />
-                    Signal Plans
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/signal-plans')}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
-                  >
-                    View All
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 pt-0">
-                {signalSubscriptions.length > 0 ? (
-                  <div className="space-y-4">
-                    {signalSubscriptions.slice(0, 3).map((subscription) => (
-                      <div key={subscription._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="text-white font-medium">{(subscription.plan as SignalPlan)?.name || 'Unknown Plan'}</h4>
-                          <p className="text-gray-400 text-sm">Expires: {formatDate(subscription.endDate)}</p>
-                        </div>
-                        <Badge className={getStatusColor(subscription.status)}>
-                          {subscription.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Rocket className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-4">No signal plans subscribed</p>
-                    <Button
-                      onClick={() => navigate('/signal-plans')}
-                      className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
-                    >
-                      Get Signals
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            
-            {/* Mentorship Plans */}
-            <Card className="bg-white/5 backdrop-blur-md border-white/10">
-              <CardHeader className="p-6">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-xl flex items-center">
-                    <Users className="h-6 w-6 mr-3 text-blue-400" />
-                    Mentorship Plans
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/mentorships')}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
-                  >
-                    View All
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 pt-0">
-                {mentorshipSubscriptions.length > 0 ? (
-                  <div className="space-y-4">
-                    {mentorshipSubscriptions.slice(0, 3).map((subscription) => (
-                      <div key={subscription._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="text-white font-medium">{(subscription.plan as MentorshipPlan)?.name || 'Unknown Plan'}</h4>
-                          <p className="text-gray-400 text-sm">Mentor: {(subscription.plan as MentorshipPlan)?.metadata?.mentorName || 'Unknown'}</p>
-                        </div>
-                        <Badge className={getStatusColor(subscription.status)}>
-                          {subscription.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-4">No mentorship plans joined</p>
-                    <Button
-                      onClick={() => navigate('/mentorships')}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    >
-                      Find Mentor
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Prop Firm Services */}
-            <Card className="bg-white/5 backdrop-blur-md border-white/10">
-              <CardHeader className="p-6">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-xl flex items-center">
-                    <CheckCircle className="h-6 w-6 mr-3 text-green-400" />
-                    Prop Firm Services
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/prop-firm-packages')}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
-                  >
-                    View All
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 pt-0">
-                {propFirmServices.length > 0 ? (
-                  <div className="space-y-4">
-                    {propFirmServices.slice(0, 3).map((service) => (
-                      <div key={service._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="text-white font-medium">{service.package?.name || 'Unknown Service'}</h4>
-                          <p className="text-gray-400 text-sm">Expires: {formatDate(service.endDate)}</p>
-                        </div>
-                        <Badge className={getStatusColor(service.status)}>
-                          {service.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-4">No prop firm services</p>
-                    <Button
-                      onClick={() => navigate('/prop-firm-packages')}
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                    >
-                      Get Funded
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-          </div>
-        </div>
-
-        {/* Support Section */}
-        <Card className="bg-white/5 backdrop-blur-md border-white/10 mt-8">
-          <CardHeader className="p-6">
-            <CardTitle className="text-white text-xl flex items-center">
-              <HelpCircle className="h-6 w-6 mr-3 text-yellow-400" />
-              Need Help?
-            </CardTitle>
-            <CardDescription className="text-gray-300">
-              Get support from our team or contact us directly
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button
-                variant="outline"
-                onClick={() => navigate('/support')}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 h-auto p-4"
-              >
-                <div className="text-center">
-                  <MessageSquare className="h-8 w-8 mx-auto mb-2 text-blue-400" />
-                  <div className="font-medium">Support Center</div>
-                  <div className="text-sm text-gray-400">Submit a ticket</div>
-                </div>
-              </Button>
+        {/* Tab Content */}
+        {activeTab === 'overview' && (
+          <>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-4 text-center">
+                  <Target className="h-6 w-6 text-purple-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{userChallenges.length}</div>
+                  <div className="text-xs text-gray-400">Competitions</div>
+                </CardContent>
+              </Card>
               
-              <Button
-                variant="outline"
-                onClick={() => window.open('mailto:support@ctg.com', '_blank')}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 h-auto p-4"
-              >
-                <div className="text-center">
-                  <Mail className="h-8 w-8 mx-auto mb-2 text-green-400" />
-                  <div className="font-medium">Email Support</div>
-                  <div className="text-sm text-gray-400">support@ctg.com</div>
-                </div>
-              </Button>
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-4 text-center">
+                  <Rocket className="h-6 w-6 text-orange-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{signalSubscriptions.length}</div>
+                  <div className="text-xs text-gray-400">Signal Plans</div>
+                </CardContent>
+              </Card>
               
-              <Button
-                variant="outline"
-                onClick={() => window.open('tel:+1234567890', '_blank')}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 h-auto p-4"
-              >
-                <div className="text-center">
-                  <Phone className="h-8 w-8 mx-auto mb-2 text-purple-400" />
-                  <div className="font-medium">Call Us</div>
-                  <div className="text-sm text-gray-400">+1 (234) 567-890</div>
-                </div>
-              </Button>
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-4 text-center">
+                  <Users className="h-6 w-6 text-blue-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{mentorshipSubscriptions.length}</div>
+                  <div className="text-xs text-gray-400">Mentorships</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                <CardContent className="p-4 text-center">
+                  <CheckCircle className="h-6 w-6 text-green-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{propFirmServices.length}</div>
+                  <div className="text-xs text-gray-400">Prop Services</div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Push Notification Status */}
+            <PushNotificationStatus />
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-6">
+                {/* My Competitions */}
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                  <CardHeader className="p-6">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-white text-xl flex items-center">
+                        <Trophy className="h-6 w-6 mr-3 text-purple-400" />
+                        My Competitions
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/challenges')}
+                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                      >
+                        View All
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6 pt-0">
+                    {userChallenges.length > 0 ? (
+                      <div className="space-y-4">
+                        {userChallenges.slice(0, 3).map((challenge) => (
+                          <div key={challenge._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                            <div className="flex-1">
+                              <h4 className="text-white font-medium">{challenge.name}</h4>
+                              <p className="text-gray-400 text-sm">{formatDate(challenge.startDate)} - {formatDate(challenge.endDate)}</p>
+                            </div>
+                            <Badge className={getStatusColor(challenge.status)}>
+                              {challenge.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-4">No competitions yet</p>
+                        <Button
+                          onClick={() => navigate('/challenges')}
+                          className="bg-purple-500 hover:bg-purple-600 text-white"
+                        >
+                          Join Competition
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Signal Plans */}
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                  <CardHeader className="p-6">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-white text-xl flex items-center">
+                        <Rocket className="h-6 w-6 mr-3 text-orange-400" />
+                        Signal Plans
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/signal-plans')}
+                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                      >
+                        View All
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6 pt-0">
+                    {signalSubscriptions.length > 0 ? (
+                      <div className="space-y-4">
+                        {signalSubscriptions.slice(0, 2).map((subscription) => (
+                          <div key={subscription._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                            <div className="flex-1">
+                              <h4 className="text-white font-medium">{subscription.signalPlan?.name || 'Signal Plan'}</h4>
+                              <p className="text-gray-400 text-sm">Active Plan</p>
+                            </div>
+                            <Badge className="bg-green-500 text-white">
+                              Active
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Rocket className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-4">No signal plans yet</p>
+                        <Button
+                          onClick={() => navigate('/signal-plans')}
+                          className="bg-orange-500 hover:bg-orange-600 text-white"
+                        >
+                          Browse Plans
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Mentorship Plans */}
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                  <CardHeader className="p-6">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-white text-xl flex items-center">
+                        <Users className="h-6 w-6 mr-3 text-blue-400" />
+                        Mentorship Plans
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/mentorships')}
+                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                      >
+                        View All
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6 pt-0">
+                    {mentorshipSubscriptions.length > 0 ? (
+                      <div className="space-y-4">
+                        {mentorshipSubscriptions.slice(0, 2).map((subscription) => (
+                          <div key={subscription._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                            <div className="flex-1">
+                              <h4 className="text-white font-medium">{subscription.mentorshipPlan?.name || 'Mentorship Plan'}</h4>
+                              <p className="text-gray-400 text-sm">Active Plan</p>
+                            </div>
+                            <Badge className="bg-green-500 text-white">
+                              Active
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-4">No mentorship plans yet</p>
+                        <Button
+                          onClick={() => navigate('/mentorships')}
+                          className="bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          Browse Plans
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Prop Firm Services */}
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
+                  <CardHeader className="p-6">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-white text-xl flex items-center">
+                        <CheckCircle className="h-6 w-6 mr-3 text-green-400" />
+                        Prop Firm Services
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/prop-firms')}
+                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                      >
+                        View All
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6 pt-0">
+                    {propFirmServices.length > 0 ? (
+                      <div className="space-y-4">
+                        {propFirmServices.slice(0, 2).map((service) => (
+                          <div key={service._id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                            <div className="flex-1">
+                              <h4 className="text-white font-medium">{service.propFirm?.name || 'Prop Firm'}</h4>
+                              <p className="text-gray-400 text-sm">{service.serviceType}</p>
+                            </div>
+                            <Badge className="bg-green-500 text-white">
+                              Active
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-4">No prop firm services yet</p>
+                        <Button
+                          onClick={() => navigate('/prop-firms')}
+                          className="bg-green-500 hover:bg-green-600 text-white"
+                        >
+                          Browse Services
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Support Section */}
+            <Card className="bg-white/5 backdrop-blur-md border-white/10 mt-8">
+              <CardHeader className="p-6">
+                <CardTitle className="text-white text-xl flex items-center">
+                  <MessageSquare className="h-6 w-6 mr-3 text-purple-400" />
+                  Need Help?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button
+                    variant="outline"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 h-20 flex flex-col items-center justify-center"
+                  >
+                    <div className="text-center">
+                      <MessageSquare className="h-6 w-6 mx-auto mb-2 text-purple-400" />
+                      <div className="font-medium">Live Chat</div>
+                      <div className="text-xs text-gray-400">Get instant help</div>
+                    </div>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 h-20 flex flex-col items-center justify-center"
+                  >
+                    <div className="text-center">
+                      <Mail className="h-6 w-6 mx-auto mb-2 text-blue-400" />
+                      <div className="font-medium">Email Us</div>
+                      <div className="text-xs text-gray-400">support@example.com</div>
+                    </div>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 h-20 flex flex-col items-center justify-center"
+                  >
+                    <div className="text-center">
+                      <Phone className="h-6 w-6 mx-auto mb-2 text-purple-400" />
+                      <div className="font-medium">Call Us</div>
+                      <div className="text-xs text-gray-400">+1 (234) 567-890</div>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {activeTab === 'challenges' && (
+          <div className="text-center py-8">
+            {challengesLoading ? (
+              <LoadingSpinner message="Loading your challenges..." />
+            ) : (
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-4">Your Challenges</h3>
+                <p className="text-gray-300">Challenges loaded: {userChallenges.length}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'signals' && (
+          <div className="text-center py-8">
+            {signalLoading ? (
+              <LoadingSpinner message="Loading your signal plans..." />
+            ) : (
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-4">Your Signal Plans</h3>
+                <p className="text-gray-300">Signal plans loaded: {signalSubscriptions.length}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'mentorships' && (
+          <div className="text-center py-8">
+            {mentorshipLoading ? (
+              <LoadingSpinner message="Loading your mentorships..." />
+            ) : (
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-4">Your Mentorships</h3>
+                <p className="text-gray-300">Mentorships loaded: {mentorshipSubscriptions.length}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'prop-firms' && (
+          <div className="text-center py-8">
+            {propFirmLoading ? (
+              <LoadingSpinner message="Loading your prop firm services..." />
+            ) : (
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-4">Your Prop Firm Services</h3>
+                <p className="text-gray-300">Prop firm services loaded: {propFirmServices.length}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

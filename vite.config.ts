@@ -85,9 +85,9 @@ export default defineConfig(({ mode }) => {
               return 'forms-vendor';
             }
           },
-          // CDN-optimized file naming
-          chunkFileNames: 'assets/[name]-[hash:8].js',
-          entryFileNames: 'assets/[name]-[hash:8].js',
+          // CDN-optimized file naming with longer hash for cache busting
+          chunkFileNames: 'assets/[name]-[hash:16].js',
+          entryFileNames: 'assets/[name]-[hash:16].js',
           assetFileNames: (assetInfo) => {
             if (!assetInfo.name) {
               return 'assets/[name]-[hash:8].[ext]';

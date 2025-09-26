@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,44 +7,42 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import GlobalPageLoader from "@/components/GlobalPageLoader";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
-
-// Lazy load all pages for better performance
-const Index = lazy(() => import("./pages/Index"));
-const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const VerifyOTP = lazy(() => import("./pages/VerifyOTP"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Challenges = lazy(() => import("./pages/Challenges"));
-const ChallengeSetup = lazy(() => import("./pages/ChallengeSetup"));
-const ChallengeDetails = lazy(() => import("./pages/ChallengeDetails"));
-const SignalPlans = lazy(() => import("./pages/SignalPlans"));
-const SignalPlanDetails = lazy(() => import("./pages/SignalPlanDetails"));
-const Chatbox = lazy(() => import("./pages/Chatbox"));
-const Mentorships = lazy(() => import("./pages/Mentorships"));
-const MentorshipDetails = lazy(() => import("./pages/MentorshipDetails"));
-const MentorshipChatbox = lazy(() => import("./pages/MentorshipChatbox"));
-const MentorshipDashboard = lazy(() => import("./pages/MentorshipDashboard"));
-const PropFirmPackages = lazy(() => import("./pages/PropFirmPackages"));
-const PropFirmServiceApplication = lazy(() => import("./pages/PropFirmServiceApplication"));
-const PropFirmServiceStatus = lazy(() => import("./pages/PropFirmServiceStatus"));
-const ManualPayment = lazy(() => import("./pages/ManualPayment"));
-const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
-const AdminPaymentVerification = lazy(() => import("./pages/AdminPaymentVerification"));
-const AdminCryptoWallets = lazy(() => import("./pages/AdminCryptoWallets"));
-const Support = lazy(() => import("./pages/Support"));
-const AdminPanel = lazy(() => import("./pages/AdminPanel"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
-const FAQ = lazy(() => import("./pages/FAQ"));
-const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
-const Contact = lazy(() => import("./pages/Contact"));
+// Import all pages directly - no dynamic imports
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOTP from "./pages/VerifyOTP";
+import ResetPassword from "./pages/ResetPassword";
+import Dashboard from "./pages/Dashboard";
+import Challenges from "./pages/Challenges";
+import ChallengeSetup from "./pages/ChallengeSetup";
+import ChallengeDetails from "./pages/ChallengeDetails";
+import SignalPlans from "./pages/SignalPlans";
+import SignalPlanDetails from "./pages/SignalPlanDetails";
+import Chatbox from "./pages/Chatbox";
+import Mentorships from "./pages/Mentorships";
+import MentorshipDetails from "./pages/MentorshipDetails";
+import MentorshipChatbox from "./pages/MentorshipChatbox";
+import MentorshipDashboard from "./pages/MentorshipDashboard";
+import PropFirmPackages from "./pages/PropFirmPackages";
+import PropFirmServiceApplication from "./pages/PropFirmServiceApplication";
+import PropFirmServiceStatus from "./pages/PropFirmServiceStatus";
+import ManualPayment from "./pages/ManualPayment";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import AdminPaymentVerification from "./pages/AdminPaymentVerification";
+import AdminCryptoWallets from "./pages/AdminCryptoWallets";
+import Support from "./pages/Support";
+import AdminPanel from "./pages/AdminPanelOld";
+import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import RefundPolicy from "./pages/RefundPolicy";
+import FAQ from "./pages/FAQ";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -89,12 +87,7 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             <GlobalPageLoader />
-            <Suspense fallback={
-              <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
-                <LoadingSpinner message="Loading page..." size="lg" fullScreen={true} />
-              </div>
-            }>
-              <Routes>
+            <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -142,7 +135,6 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-            </Suspense>
           </BrowserRouter>
         </AuthProvider>
       </SettingsProvider>
