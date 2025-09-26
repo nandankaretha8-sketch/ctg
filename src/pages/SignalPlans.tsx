@@ -60,10 +60,23 @@ const SignalPlans = () => {
   const [paymentStatuses, setPaymentStatuses] = useState<Record<string, { status: string; loading: boolean }>>({});
 
   useEffect(() => {
+    // Global error handler for undefined issues
+    const handleError = (event: ErrorEvent) => {
+      if (event.message && event.message.includes('undefined')) {
+        console.error('🔍 [DEBUG] ❌ GLOBAL ERROR CAUGHT:', event.message, event.filename, event.lineno);
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    
     fetchSignalPlans();
     if (user) {
       fetchUserSubscriptions();
     }
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
   }, [user]);
 
   useEffect(() => {
@@ -72,6 +85,25 @@ const SignalPlans = () => {
     console.log('🔍 [DEBUG] User exists:', !!user);
     console.log('🔍 [DEBUG] User token exists:', !!user?.token);
     console.log('🔍 [DEBUG] Current plans:', plans);
+    
+    // More aggressive debugging for undefined IDs
+    if (plans.length > 0) {
+      console.log('🔍 [DEBUG] Checking each plan for undefined IDs:');
+      plans.forEach((plan, index) => {
+        console.log(`🔍 [DEBUG] Plan ${index}:`, {
+          _id: plan._id,
+          name: plan.name,
+          idType: typeof plan._id,
+          idLength: plan._id?.length,
+          isEmpty: !plan._id || plan._id.trim() === '',
+          fullPlan: plan
+        });
+        
+        if (!plan._id || plan._id.trim() === '') {
+          console.error('🔍 [DEBUG] ❌ FOUND UNDEFINED/EMPTY ID IN PLAN:', plan);
+        }
+      });
+    }
     
     if (plans.length > 0 && user && user.token) {
       console.log('🔍 [DEBUG] Conditions met, calling checkAllPaymentStatuses...');
