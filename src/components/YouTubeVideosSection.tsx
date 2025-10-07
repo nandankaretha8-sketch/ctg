@@ -64,7 +64,12 @@ const YouTubeVideosSection = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              <span className="bg-gradient-to-r from-gray-400 to-gray-600 bg-clip-text text-transparent">
+              <span style={{
+                background: 'linear-gradient(135deg, #ffffff, #6b7280)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
                 Explore Our Videos
               </span>
             </h2>
@@ -89,7 +94,12 @@ const YouTubeVideosSection = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            <span className="bg-gradient-to-r from-gray-400 to-gray-600 bg-clip-text text-transparent">
+            <span style={{
+              background: 'linear-gradient(135deg, #ffffff, #6b7280)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
               Explore Our Videos
             </span>
           </h2>
@@ -164,4 +174,3 @@ const YouTubeVideosSection = () => {
 };
 
 export default YouTubeVideosSection;
-

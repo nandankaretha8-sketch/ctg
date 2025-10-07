@@ -176,20 +176,21 @@ const MentorshipsSection = () => {
           <div className="relative overflow-hidden rounded-2xl">
             {/* Mentor Photo with Vignette Effect */}
             <div className="relative h-96 md:h-[500px]">
-              {settings?.mentorPhoto ? (
-                <img
-                  src={settings.mentorPhoto}
-                  alt="Expert Mentor"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-900 to-pink-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <User className="h-24 w-24 text-white/50 mx-auto mb-4" />
-                    <p className="text-white/70 text-lg">Mentor Photo</p>
-                  </div>
+              <img
+                src="/mentor-photo.JPEG"
+                alt="Expert Mentor"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling.style.display = 'flex';
+                }}
+              />
+              <div className="w-full h-full bg-gradient-to-br from-purple-900 to-pink-900 flex items-center justify-center" style={{ display: 'none' }}>
+                <div className="text-center">
+                  <User className="h-24 w-24 text-white/50 mx-auto mb-4" />
+                  <p className="text-white/70 text-lg">Mentor Photo</p>
                 </div>
-              )}
+              </div>
               
               {/* Vignette Effect */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>

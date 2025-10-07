@@ -94,16 +94,20 @@ const MentorshipDashboard = () => {
   const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
+    console.log('MentorshipDashboard useEffect triggered:', { planId, user });
     if (planId && user) {
       fetchMentorshipData();
       fetchChatMessages();
     } else {
+      console.log('Missing planId or user:', { planId, user });
       setLoading(false);
     }
   }, [planId, user]);
 
   const fetchMentorshipData = async () => {
     try {
+      console.log('Fetching mentorship data for planId:', planId);
+      console.log('API_URL:', API_URL);
       
       // Fetch mentorship plan details
       const planResponse = await fetch(`${API_URL}/mentorship-plans/${planId}`, {
@@ -112,30 +116,38 @@ const MentorshipDashboard = () => {
         }
       });
       
+      console.log('Plan response status:', planResponse.status);
       
       if (planResponse.ok) {
         const planData = await planResponse.json();
+        console.log('Plan data received:', planData);
         setPlan(planData.data);
       } else {
         console.error('Failed to fetch plan data:', planResponse.status, planResponse.statusText);
       }
 
       // Fetch user's subscription
+      console.log('Fetching user subscriptions...');
       const subscriptionResponse = await fetch(`${API_URL}/mentorship-plans/user/subscriptions`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       
+      console.log('Subscription response status:', subscriptionResponse.status);
       
       if (subscriptionResponse.ok) {
         const subscriptionData = await subscriptionResponse.json();
+        console.log('Subscription data received:', subscriptionData);
+        console.log('Looking for planId:', planId);
         
         // Look for any subscription to this plan (active or not)
         const userSubscription = subscriptionData.data.find((sub: any) => {
+          console.log('Checking subscription:', sub.mentorshipPlan?._id, 'against planId:', planId);
           return sub.mentorshipPlan?._id === planId;
         });
         
+        console.log('Found user subscription:', userSubscription);
         setSubscription(userSubscription);
       } else {
         console.error('Failed to fetch subscription data:', subscriptionResponse.status, subscriptionResponse.statusText);
@@ -406,17 +418,18 @@ const MentorshipDashboard = () => {
               <CardContent className="p-6 pt-0">
                 <div className="flex items-start space-x-4">
                   <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center">
-                    {settings?.mentorPhoto ? (
-                      <img
-                        src={settings.mentorPhoto}
-                        alt="Mentor"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-r from-gray-500 to-gray-700 flex items-center justify-center">
-                        <User className="h-8 w-8 text-white" />
-                      </div>
-                    )}
+                    <img
+                      src="/mentor-photo.JPEG"
+                      alt="Mentor"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-full h-full bg-gradient-to-r from-gray-500 to-gray-700 flex items-center justify-center" style={{ display: 'none' }}>
+                      <User className="h-8 w-8 text-white" />
+                    </div>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-white font-semibold text-lg mb-2">

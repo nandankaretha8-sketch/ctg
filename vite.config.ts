@@ -32,106 +32,65 @@ export default defineConfig(({ mode }) => {
         compress: {
           drop_console: mode === 'production',
           drop_debugger: mode === 'production',
-          pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : [],
-          passes: 3, // Increased passes for better compression
-          unsafe: true, // Enable unsafe optimizations
-          unsafe_comps: true,
-          unsafe_math: true,
         },
-        mangle: {
-          safari10: true, // Fix Safari 10 issues
-          properties: {
-            regex: /^_/ // Mangle properties starting with _
-          }
-        },
-        format: {
-          comments: false, // Remove all comments
-        }
       },
       rollupOptions: {
         output: {
-          // CDN-optimized chunk splitting
-          manualChunks: (id) => {
-            // React ecosystem
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            // Router
-            if (id.includes('react-router')) {
-              return 'router-vendor';
-            }
-            // Query library
-            if (id.includes('@tanstack/react-query')) {
-              return 'query-vendor';
-            }
-            // UI components
-            if (id.includes('@radix-ui')) {
-              return 'ui-vendor';
-            }
-            // Icons
-            if (id.includes('lucide-react')) {
-              return 'icons-vendor';
-            }
-            // Utils
-            if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) {
-              return 'utils-vendor';
-            }
-            // Charts
-            if (id.includes('recharts')) {
-              return 'charts-vendor';
-            }
-            // Forms
-            if (id.includes('react-hook-form') || id.includes('@hookform')) {
-              return 'forms-vendor';
-            }
+          // Optimized chunk splitting to reduce dependencies and improve reliability
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'router-vendor': ['react-router-dom'],
+            'query-vendor': ['@tanstack/react-query'],
+            'ui-vendor': [
+              '@radix-ui/react-dialog', 
+              '@radix-ui/react-dropdown-menu', 
+              '@radix-ui/react-toast', 
+              '@radix-ui/react-tooltip',
+              '@radix-ui/react-select',
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-alert-dialog'
+            ],
+            'icons-vendor': ['lucide-react'],
+            'utils-vendor': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+            'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
           },
-          // CDN-optimized file naming with longer hash for cache busting
-          chunkFileNames: 'assets/[name]-[hash:16].js',
-          entryFileNames: 'assets/[name]-[hash:16].js',
-          assetFileNames: (assetInfo) => {
-            if (!assetInfo.name) {
-              return 'assets/[name]-[hash:8].[ext]';
-            }
-            
-            const info = assetInfo.name.split('.');
-            const ext = info[info.length - 1];
-            
-            if (/\.(css)$/.test(assetInfo.name)) {
-              return `assets/css/[name]-[hash:8].${ext}`;
-            }
-            if (/\.(png|jpe?g|gif|svg|webp|avif)$/.test(assetInfo.name)) {
-              return `assets/images/[name]-[hash:8].${ext}`;
-            }
-            if (/\.(woff2?|eot|ttf|otf)$/.test(assetInfo.name)) {
-              return `assets/fonts/[name]-[hash:8].${ext}`;
-            }
-            return `assets/[name]-[hash:8].${ext}`;
+          // Ensure consistent chunk naming
+          chunkFileNames: (chunkInfo) => {
+            const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+            return `assets/[name]-[hash].js`;
           },
+          // Optimize asset naming
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+          entryFileNames: 'assets/[name]-[hash].js',
         },
       },
-      // CDN optimization settings
+      // Increase chunk size warning limit
       chunkSizeWarningLimit: 1000,
-      sourcemap: false, // Disable source maps for production
-      cssCodeSplit: true,
-      reportCompressedSize: false,
-      // Enable tree shaking
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
-        tryCatchDeoptimization: false
-      },
-      // Optimize for CDN
-      assetsInlineLimit: 4096, // Inline small assets
     },
     optimizeDeps: {
-      // Pre-bundle dependencies for faster dev server
+      // Pre-bundle dependencies for faster dev server and better reliability
       include: [
         'react',
         'react-dom',
         'react-router-dom',
         '@tanstack/react-query',
         'lucide-react',
+        '@radix-ui/react-dialog',
+        '@radix-ui/react-dropdown-menu',
+        '@radix-ui/react-toast',
+        '@radix-ui/react-tooltip',
+        '@radix-ui/react-select',
+        'clsx',
+        'tailwind-merge',
+        'class-variance-authority',
       ],
+      // Force pre-bundling of these dependencies
+      force: true,
+    },
+    // Add build optimizations
+    esbuild: {
+      target: 'esnext',
+      format: 'esm',
     },
   };
 });

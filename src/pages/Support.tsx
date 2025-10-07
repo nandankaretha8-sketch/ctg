@@ -23,7 +23,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-import { API_URL, authenticatedApiCall } from '@/lib/api';
+import { API_URL } from '@/lib/api';
 interface SupportTicket {
   _id: string;
   subject: string;
@@ -132,8 +132,12 @@ const Support = () => {
 
     setSending(true);
     try {
-      const response = await authenticatedApiCall(`/support/${selectedTicket._id}/messages`, {
+      const response = await fetch(`${API_URL}/support/${selectedTicket._id}/messages`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({ message: newMessage })
       });
 
@@ -159,8 +163,12 @@ const Support = () => {
 
     setSending(true);
     try {
-      const response = await authenticatedApiCall('/support', {
+      const response = await fetch(`${API_URL}/support`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify(newTicketForm)
       });
 

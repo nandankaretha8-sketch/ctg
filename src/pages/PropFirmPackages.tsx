@@ -6,8 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Star, TrendingUp, Shield, Clock, Users, Target, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { useManualPageData } from '@/hooks/useManualQuery';
-import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { API_URL } from '@/lib/api';
 interface PropFirmPackage {
@@ -40,18 +38,19 @@ interface UserService {
 }
 
 const PropFirmPackages = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
   const [packages, setPackages] = useState<PropFirmPackage[]>([]);
   const [userServices, setUserServices] = useState<UserService[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
+    
     fetchPackages();
     if (user) {
       fetchUserServices();
+    } else {
     }
   }, [user]);
 
@@ -59,7 +58,8 @@ const PropFirmPackages = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_URL}/prop-firm-packages`);
+        const response = await fetch(`${API_URL}/prop-firm-packages`);
+      
       
       if (response.ok) {
         const data = await response.json();
@@ -89,6 +89,7 @@ const PropFirmPackages = () => {
         }
       });
 
+
       if (response.ok) {
         const data = await response.json();
         setUserServices(data.data || []);
@@ -97,7 +98,6 @@ const PropFirmPackages = () => {
       // Silent error handling for user services
     }
   };
-
 
   const getDurationLabel = (pricingType: string) => {
     switch (pricingType) {
@@ -144,11 +144,7 @@ const PropFirmPackages = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
-        <LoadingSpinner 
-          message="Loading prop firm packages..." 
-          size="lg"
-          fullScreen={true}
-        />
+        <div className="text-white text-xl">Loading prop firm packages...</div>
       </div>
     );
   }
@@ -192,7 +188,7 @@ const PropFirmPackages = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Prop Firm Account Management
             </span>
           </h1>
@@ -200,7 +196,6 @@ const PropFirmPackages = () => {
             Let our experts manage your prop firm accounts with professional trading strategies
           </p>
         </div>
-
 
         {packages.length === 0 ? (
           <Card className="glass-card border-glass-border/30">
@@ -210,12 +205,12 @@ const PropFirmPackages = () => {
               <p className="text-gray-400">Check back later for new prop firm management packages</p>
             </CardContent>
           </Card>
-        ) : packages.length > 0 ? (
+        ) : (
           <>
             {/* Packages Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {packages.map((pkg) => (
-                <Card key={pkg._id} className="glass-card border-glass-border/30 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer group relative">
+                <Card key={pkg._id} className="glass-card border-glass-border/30 relative">
                   {pkg.isPopular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-orange-500 text-white">
@@ -226,7 +221,7 @@ const PropFirmPackages = () => {
                   )}
                   
                   <CardHeader className="p-6 text-center">
-                    <CardTitle className="text-white text-xl mb-2 group-hover:text-purple-300 transition-colors">{pkg.name}</CardTitle>
+                    <CardTitle className="text-white text-xl mb-2">{pkg.name}</CardTitle>
                     <CardDescription className="text-gray-300 text-sm">
                       {getDurationLabel(pkg.pricingType)} Service
                     </CardDescription>
@@ -292,29 +287,17 @@ const PropFirmPackages = () => {
                       return hasActive ? (
                         <Button
                           onClick={() => handleViewDetails(pkg._id)}
-                          className="w-full relative overflow-hidden group transition-all duration-300 bg-gradient-to-r from-purple-600 to-purple-900 hover:from-purple-700 hover:to-purple-950 shadow-lg hover:shadow-purple-500/25 hover:scale-105 text-white"
+                          className="w-full bg-gradient-to-r from-purple-600 to-purple-900 hover:from-purple-700 hover:to-purple-950 text-white"
                         >
-                          {/* Animated background effect */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-                          
-                          {/* Button content */}
-                          <div className="relative flex items-center justify-center">
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </div>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
                         </Button>
                       ) : (
                         <Button
                           onClick={() => handleApplyNow(pkg._id)}
-                          className="w-full relative overflow-hidden group transition-all duration-300 bg-gradient-to-r from-purple-600 to-purple-900 hover:from-purple-700 hover:to-purple-950 shadow-lg hover:shadow-purple-500/25 hover:scale-105 text-white"
+                          className="w-full bg-gradient-to-r from-purple-600 to-purple-900 hover:from-purple-700 hover:to-purple-950 text-white"
                         >
-                          {/* Animated background effect */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-                          
-                          {/* Button content */}
-                          <div className="relative flex items-center justify-center">
-                            Apply Now
-                          </div>
+                          Apply Now
                         </Button>
                       );
                     })()}
@@ -363,7 +346,7 @@ const PropFirmPackages = () => {
               </div>
             </div>
           </>
-        ) : null}
+        )}
       </div>
     </div>
   );

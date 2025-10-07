@@ -58,11 +58,21 @@ const Login = () => {
           {/* Left side - Logo + Brand */}
           <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <img 
-              src="/icon.svg" 
+              src="/icon.jpeg" 
               alt="CTG" 
-              className="h-10 w-10 object-contain"
+              className="h-10 w-10 rounded-full object-cover"
             />
-            <span className="text-2xl font-bold gradient-text">CTG</span>
+            <span 
+              className="text-2xl font-bold"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff, #6b7280)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              CTG
+            </span>
           </Link>
 
           {/* Right side - Register Link */}

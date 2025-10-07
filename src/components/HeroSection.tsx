@@ -91,7 +91,8 @@ const HeroSection = () => {
         <div className="animate-fade-in-up">
           {/* Main Title */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Master Trading With CTG Academy</span>
+            <span className="gradient-text">Master Trading</span><br />
+            <span className="text-white">With CTG</span>
           </h1>
           
           {/* Service Tabs */}

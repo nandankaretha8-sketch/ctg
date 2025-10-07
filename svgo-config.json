@@ -1,0 +1,67 @@
+{
+  "plugins": [
+    {
+      "name": "removeViewBox",
+      "active": false
+    },
+    {
+      "name": "removeDimensions", 
+      "active": false
+    },
+    {
+      "name": "removeUselessDefs",
+      "active": true
+    },
+    {
+      "name": "cleanupIDs",
+      "active": true
+    },
+    {
+      "name": "removeMetadata",
+      "active": true
+    },
+    {
+      "name": "removeTitle",
+      "active": true
+    },
+    {
+      "name": "removeDesc", 
+      "active": true
+    },
+    {
+      "name": "removeUselessStrokeAndFill",
+      "active": true
+    },
+    {
+      "name": "removeEmptyContainers",
+      "active": true
+    },
+    {
+      "name": "mergePaths",
+      "active": true
+    },
+    {
+      "name": "convertShapeToPath",
+      "active": true
+    },
+    {
+      "name": "removeComments",
+      "active": true
+    },
+    {
+      "name": "convertColors",
+      "active": true,
+      "params": {
+        "shorthex": true,
+        "shortname": true
+      }
+    },
+    {
+      "name": "removeAttrs",
+      "active": true,
+      "params": {
+        "attrs": "(fill|stroke|width|height)"
+      }
+    }
+  ]
+}

@@ -4,19 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, BarChart3, LogIn, Rocket, LogOut, User, Shield, FileText, HelpCircle, Scale, Mail, Settings } from "@/components/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import LogoutConfirmationDialog from "./LogoutConfirmationDialog";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const { settings } = useSettings();
   const navigate = useNavigate();
 
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  const handleLogoutDialogClose = () => {
+    setShowLogoutDialog(false);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md">
       <div className="glass-card rounded-b-2xl">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-2 sm:px-4 md:px-6 py-3 sm:py-4">
           {/* Left side - Hamburger + Logo + Brand */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 -ml-1 sm:-ml-2 md:ml-0">
             {/* Hamburger Menu */}
             <Button
               variant="ghost"
@@ -32,28 +47,36 @@ const Header = () => {
             </Button>
 
             {/* Logo */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
               {settings.logo ? (
                 <img 
                   src={settings.logo} 
-                  alt={settings.siteName || "CTG Academy"} 
-                  className="h-10 w-auto object-contain"
+                  alt={settings.siteName || "CTG"} 
+                  className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
                 />
               ) : (
                 <img 
-                  src="/icon.svg" 
-                  alt={settings.siteName || "CTG Academy"} 
-                  className="h-10 w-10 object-contain"
+                  src="/icon.jpeg" 
+                  alt={settings.siteName || "CTG"} 
+                  className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
                 />
               )}
-              <span className="text-2xl font-bold gradient-text">
-                {settings.siteName || "CTG Academy"}
+              <span 
+                className="text-sm sm:text-base md:text-2xl font-bold"
+                style={{
+                  background: 'linear-gradient(135deg, #ffffff, #6b7280)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}
+              >
+                {settings.siteName || "ctg academy"}
               </span>
             </div>
           </div>
 
           {/* Right side - Navigation Buttons */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             {isAuthenticated ? (
               <>
                 <Button
@@ -94,7 +117,7 @@ const Header = () => {
                   variant="ghost"
                   size="sm"
                   className="text-foreground hover:text-white hover:bg-glass-border/20"
-                  onClick={logout}
+                  onClick={handleLogoutClick}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Logout</span>
@@ -115,7 +138,7 @@ const Header = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-foreground hover:text-white hover:bg-glass-border/20"
+                    className="text-foreground hover:text-white hover:bg-glass-border/20 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
                   >
                     <LogIn className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Login</span>
@@ -124,13 +147,13 @@ const Header = () => {
                 
                 <Link to="/register">
                   <button
-                    className="text-sm px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-900 text-white font-bold rounded-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow"
+                    className="flex items-center justify-center text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-purple-600 to-purple-900 text-white font-bold rounded-lg shadow-2xl hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow"
                     style={{ 
                       color: 'white !important'
                     }}
                   >
-                    <Rocket className="h-4 w-4 mr-2 inline" style={{ color: 'white !important' }} />
-                    <span style={{ color: 'white !important', opacity: '1 !important' }}>Get Started</span>
+                    <Rocket className="h-4 w-4 mr-2" style={{ color: 'white !important' }} />
+                    <span style={{ color: 'white !important', opacity: '1 !important' }}>Start</span>
                   </button>
                 </Link>
               </>
@@ -233,7 +256,7 @@ const Header = () => {
                       size="sm"
                       className="justify-start text-foreground hover:text-white w-full"
                       onClick={() => {
-                        logout();
+                        handleLogoutClick();
                         setIsMenuOpen(false);
                       }}
                     >
@@ -247,6 +270,13 @@ const Header = () => {
           </div>
         )}
       </div>
+      
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmationDialog
+        isOpen={showLogoutDialog}
+        onClose={handleLogoutDialogClose}
+        onConfirm={handleLogoutConfirm}
+      />
     </header>
   );
 };

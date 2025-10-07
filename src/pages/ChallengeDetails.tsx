@@ -30,6 +30,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { toast } from 'sonner';
 import { API_URL } from '@/lib/api';
+import ChallengeCountdown from '@/components/ChallengeCountdown';
 
 interface Challenge {
   _id: string;
@@ -492,9 +493,9 @@ const ChallengeDetails = () => {
         {/* Header */}
         <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 lg:mb-8">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => navigate('/challenges')}
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 text-sm sm:text-base"
+            className="text-white hover:bg-white/10 text-sm sm:text-base"
           >
             <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Back to Challenges</span>
@@ -669,6 +670,12 @@ const ChallengeDetails = () => {
                     {formatDate(challenge.startDate)} - {formatDate(challenge.endDate)}
                   </span>
                 </div>
+                
+                {/* Challenge Countdown */}
+                <ChallengeCountdown 
+                  startDate={challenge.startDate} 
+                  endDate={challenge.endDate} 
+                />
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                   <span className="text-gray-400 text-sm sm:text-base">Participants:</span>
                   <span className="text-white text-sm sm:text-base">

@@ -27,7 +27,7 @@ interface ServiceData {
   id: string;
   name: string;
   price: number;
-  type: 'challenge' | 'signal_plan' | 'mentorship' | 'prop_firm_service';
+  type: 'challenge' | 'signal_plan' | 'mentorship' | 'prop_firm_service' | 'copytrade';
 }
 
 const ManualPayment = () => {
@@ -38,8 +38,10 @@ const ManualPayment = () => {
   
   const [cryptoWallets, setCryptoWallets] = useState<CryptoWallet[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<CryptoWallet | null>(null);
-  const [serviceData, setServiceData] = useState<ServiceData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [serviceData, setServiceData] = useState<ServiceData | null>(
+    location.state?.serviceData || null
+  );
+  const [loading, setLoading] = useState(!location.state?.serviceData);
   const [submitting, setSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -50,8 +52,10 @@ const ManualPayment = () => {
 
   useEffect(() => {
     fetchCryptoWallets();
-    // Always refresh service data from server to ensure latest amount
-    fetchServiceData();
+    // Only fetch service data if we don't have it from navigation state
+    if (!location.state?.serviceData) {
+      fetchServiceData();
+    }
   }, [serviceType, serviceId]);
 
   const fetchServiceData = async () => {
@@ -84,6 +88,13 @@ const ManualPayment = () => {
         case 'prop_firm_service':
           // For prop firm, fetch package to get price/name
           response = await fetch(`${API_URL}/prop-firm-packages/${serviceId}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          break;
+        case 'copytrade':
+          response = await fetch(`${API_URL}/copytrade/plans/${serviceId}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -126,7 +137,10 @@ const ManualPayment = () => {
     } catch (error) {
       toast.error('Failed to load crypto wallets');
     } finally {
-      setLoading(false);
+      // Only set loading to false if we're not fetching service data
+      if (location.state?.serviceData) {
+        setLoading(false);
+      }
     }
   };
 

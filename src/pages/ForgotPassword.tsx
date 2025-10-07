@@ -103,7 +103,17 @@ const ForgotPassword = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">C</span>
               </div>
-              <span className="text-2xl font-bold gradient-text">CTG</span>
+              <span 
+              className="text-2xl font-bold"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff, #6b7280)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              CTG
+            </span>
             </Link>
 
             <Link to="/login">
@@ -195,7 +205,17 @@ const ForgotPassword = () => {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="text-2xl font-bold gradient-text">CTG</span>
+            <span 
+              className="text-2xl font-bold"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff, #6b7280)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              CTG
+            </span>
           </Link>
 
           <Link to="/login">

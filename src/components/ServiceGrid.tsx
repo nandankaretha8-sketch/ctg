@@ -12,12 +12,39 @@ import {
   X
 } from '@/components/icons';
 import { API_URL } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ServiceGrid = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [footerSettings, setFooterSettings] = useState<any>(null);
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
   const [comingSoonService, setComingSoonService] = useState<string>('');
+
+  // Time-based greeting logic
+  const getTimeBasedGreeting = () => {
+    const currentHour = new Date().getHours();
+    
+    if (currentHour >= 6 && currentHour < 12) {
+      return "Good morning";
+    } else if (currentHour >= 12 && currentHour < 18) {
+      return "Good afternoon";
+    } else if (currentHour >= 18 && currentHour < 22) {
+      return "Good evening";
+    } else {
+      return "Good night";
+    }
+  };
+
+  // Get user display name with fallback
+  const getUserDisplayName = () => {
+    if (user?.firstName) {
+      return user.firstName;
+    } else if (user?.username) {
+      return user.username;
+    }
+    return "Trader";
+  };
 
   // Fetch footer settings to get Telegram URL
   useEffect(() => {
@@ -84,7 +111,7 @@ const ServiceGrid = () => {
     },
     {
       id: 'courses',
-      title: 'Courses',
+      title: 'Materials',
       subtitle: 'Traders therapy',
       description: 'Learn trading strategies',
       icon: BookOpen,
@@ -102,7 +129,7 @@ const ServiceGrid = () => {
       color: 'from-indigo-500 to-purple-500',
       iconColor: 'text-indigo-300',
       route: '/copytrade',
-      isActive: false // Keep card but not connected yet
+      isActive: true // Now active
     },
     {
       id: 'community',
@@ -148,24 +175,39 @@ const ServiceGrid = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/30 to-black/90" />
-      
-      {/* Ribbon Gradient Background */}
-      <div className="ribbon-background">
-        <div className="ribbon ribbon-1"></div>
-        <div className="ribbon ribbon-2"></div>
-      </div>
-      
+    <section id="services" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24">
       {/* Content */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8">
+        {/* Personalized Greeting for Logged-in Users */}
+        {user && (
+          <div className="text-center mb-8 animate-fade-in-up">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-300 mb-2">
+              {getTimeBasedGreeting()}, <span className="text-white font-bold">{getUserDisplayName()}</span>!
+            </h2>
+            <p className="text-sm md:text-base text-gray-400">
+              Ready to improve your journey?
+            </p>
+          </div>
+        )}
+
         {/* Hero Title */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Master Trading With CTG Academy</span>
+            <span style={{
+              background: 'linear-gradient(135deg, #ffffff, #6b7280)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>CTG: Your Path To Consistent Trading</span>
           </h1>
+          <div className="max-w-4xl mx-auto">
+            <p className="text-base md:text-lg text-gray-300 mb-6 leading-relaxed">
+              My mission is to give you the education I wish I had as a beginner trader - cutting through the noise to deliver a <span className="text-white font-semibold">SIMPLIFIED</span>, powerful approach to trading. At CTG Academy, we're not about quick wins; we're about building a disciplined, sustainable skill for life.
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">
+              Explore Our Programs
+            </h2>
+          </div>
         </div>
 
         {/* Grid Container */}

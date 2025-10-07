@@ -22,7 +22,6 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useManualPageData } from '@/hooks/useManualQuery';
 import { toast } from 'sonner';
 
 import { API_URL } from '@/lib/api';
@@ -81,12 +80,11 @@ const Mentorships = () => {
   
   const navigate = useNavigate();
   
-  const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
-
   const [plans, setPlans] = useState<MentorshipPlan[]>([]);
   const [userSubscriptions, setUserSubscriptions] = useState<UserSubscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchMentorshipPlans();
@@ -136,7 +134,6 @@ const Mentorships = () => {
       // Silent error handling for user subscriptions
     }
   };
-
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -217,7 +214,7 @@ const Mentorships = () => {
     );
   }
 
-  // Show error state if there's an error (now handled by the hook)
+  // Show error state if there's an error
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4">

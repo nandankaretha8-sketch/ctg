@@ -15,9 +15,14 @@
   Cache-Control: public, max-age=31536000, immutable
   Content-Type: text/css
 
-# JavaScript Files
-*.js
+# JavaScript Files - Different strategies for different types
+/assets/*.js
   Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/javascript
+
+# Dynamic import chunks - shorter cache with revalidation
+/assets/*-*.js
+  Cache-Control: public, max-age=86400, must-revalidate
   Content-Type: application/javascript
 
 # Images

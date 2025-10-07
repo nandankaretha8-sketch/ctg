@@ -704,4 +704,3 @@ const ChallengeSetup = () => {
 };
 
 export default ChallengeSetup;
-

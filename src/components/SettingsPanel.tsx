@@ -31,11 +31,13 @@ const SettingsPanel: React.FC = () => {
   // Form states
   const [siteName, setSiteName] = useState('');
   const [siteDescription, setSiteDescription] = useState('');
+  const [mentorPhotoPath, setMentorPhotoPath] = useState('');
 
   useEffect(() => {
     if (settings.siteName !== undefined) {
       setSiteName(settings.siteName || '');
       setSiteDescription(settings.siteDescription || '');
+      setMentorPhotoPath(settings.mentorPhoto || '');
       setLoading(false);
     }
   }, [settings]);
@@ -45,7 +47,8 @@ const SettingsPanel: React.FC = () => {
       setSaving(true);
       const response = await settingsService.updateSettings({
         siteName,
-        siteDescription
+        siteDescription,
+        mentorPhoto: mentorPhotoPath
       });
       
       if (response.success) {
@@ -464,12 +467,30 @@ const SettingsPanel: React.FC = () => {
                   Delete
                 </Button>
               </div>
+
             </div>
           )}
           
           <div className="space-y-2">
+            <Label htmlFor="mentorPhotoPath" className="text-white">
+              Mentor Photo Path (e.g., /mentor-photo.jpg)
+            </Label>
+            <Input
+              id="mentorPhotoPath"
+              type="text"
+              placeholder="/mentor-photo.jpg"
+              value={mentorPhotoPath}
+              onChange={(e) => setMentorPhotoPath(e.target.value)}
+              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+            />
+            <p className="text-xs text-gray-400">
+              Enter the path to your mentor photo file (e.g., /mentor-photo.jpg). Place the image file in the public directory.
+            </p>
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="mentorPhotoUpload" className="text-white">
-              {settings.mentorPhoto ? 'Replace Mentor Photo' : 'Upload Mentor Photo'}
+              Or Upload Mentor Photo
             </Label>
             <div className="flex items-center gap-4">
               <div className="relative flex-1">

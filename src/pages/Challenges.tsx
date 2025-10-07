@@ -6,11 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Rocket, Trophy, Users, Clock, DollarSign, Target, CheckCircle, Calendar, UserCheck, Home, ArrowLeft, Eye, FileText, X, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
-import { useManualQuery } from '@/hooks/useManualQuery';
 import { toast } from 'sonner';
-import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { API_URL } from '@/lib/api';
+import ChallengeCountdown from '@/components/ChallengeCountdown';
 interface Challenge {
   _id: string;
   name: string;
@@ -47,7 +46,6 @@ const Challenges = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [userChallenges, setUserChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('all');
   const [showRules, setShowRules] = useState(false);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
@@ -61,49 +59,6 @@ const Challenges = () => {
       fetchUserChallenges();
     }
   }, [user]);
-
-  const fetchChallenges = async () => {
-    try {
-      setError(null);
-      const response = await fetch(`${API_URL}/challenges?status=active,upcoming,completed`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setChallenges(data.data || []);
-      } else {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch challenges: ${response.status} ${errorText}`);
-      }
-    } catch (error) {
-      console.error('Error fetching challenges:', error);
-      setError('Failed to load challenges. Please check your connection and try again.');
-      toast.error('Failed to fetch challenges');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUserChallenges = async () => {
-    try {
-      const response = await fetch(`${API_URL}/challenges/user/my-challenges`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUserChallenges(data.data || []);
-      }
-    } catch (error) {
-      // Silent error handling for user challenges
-    }
-  };
-
 
   // Check payment statuses when challenges are loaded
   useEffect(() => {
@@ -149,6 +104,44 @@ const Challenges = () => {
     };
   }, [user, challenges]);
 
+  const fetchChallenges = async () => {
+    try {
+      setLoading(true);
+      // Fetch all challenges (active, upcoming, completed)
+      const response = await fetch(`${API_URL}/challenges?status=active,upcoming,completed`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setChallenges(data.data);
+      } else {
+        toast.error('Failed to fetch challenges');
+      }
+    } catch (error) {
+      toast.error('Failed to fetch challenges');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserChallenges = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${API_URL}/challenges/user/my-challenges`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setUserChallenges(data.data);
+      }
+    } catch (error) {
+      // Silent error handling for user challenges
+    }
+  };
 
   const handleJoinChallenge = (challengeId: string, isFree: boolean, status: string) => {
     if (!user || !user.token) {
@@ -218,23 +211,6 @@ const Challenges = () => {
         return 'bg-green-500';
       default:
         return 'bg-purple-500';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-500 text-white';
-      case 'upcoming':
-        return 'bg-yellow-500 text-white';
-      case 'completed':
-        return 'bg-gray-500 text-white';
-      case 'pending':
-        return 'bg-orange-500 text-white';
-      case 'expired':
-        return 'bg-red-500 text-white';
-      default:
-        return 'bg-gray-500 text-white';
     }
   };
 
@@ -365,7 +341,7 @@ const Challenges = () => {
       return {
         text: 'View Details',
         icon: <Eye className="h-4 w-4" />,
-        className: 'bg-gradient-to-r from-purple-600 to-purple-900 hover:from-purple-700 hover:to-purple-950'
+        className: 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
       };
     }
 
@@ -518,7 +494,7 @@ const Challenges = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
-        <LoadingSpinner message="Loading competitions..." size="lg" fullScreen={true} />
+        <div className="text-white text-xl">Loading competitions...</div>
       </div>
     );
   }
@@ -541,21 +517,20 @@ const Challenges = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-4 mb-4">
-          <h1 className="text-4xl md:text-5xl font-bold">
-            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              Trading Tournaments
-            </span>
-          </h1>
+            <h1 className="text-4xl md:text-5xl font-bold">
+              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Trading Competitions
+              </span>
+            </h1>
           </div>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Join exciting trading tournaments, test your skills, and win amazing prizes
+            Join exciting trading competitions, test your skills, and win amazing prizes
           </p>
         </div>
 
 
         {/* Sorting Options */}
-        {challenges.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8 justify-center">
+        <div className="flex flex-wrap gap-2 mb-8 justify-center">
           <Button
             variant={sortBy === 'all' ? 'default' : 'outline'}
             size="sm"
@@ -622,171 +597,283 @@ const Challenges = () => {
               You Joined
             </Button>
           )}
+        </div>
+
+        {/* Challenges Grid */}
+        {getFilteredChallenges().length === 0 ? (
+          <div className="text-center py-12">
+            <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-300 mb-2">
+              {sortBy === 'joined' ? 'No Joined Competitions' : 'No Competitions Available'}
+            </h3>
+            <p className="text-gray-400">
+              {sortBy === 'joined' 
+                ? 'You haven\'t joined any competitions yet. Browse and join some exciting trading competitions!' 
+                : 'Check back later for new trading competitions!'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {getFilteredChallenges().map((challenge) => {
+              const challengeStatus = getChallengeStatus(challenge.startDate, challenge.endDate, challenge.status);
+              const userHasJoined = hasUserJoined(challenge._id);
+              
+              return (
+              <Card key={challenge._id} className="bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-all duration-300">
+                <CardHeader>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Badge className={`${getTypeColor(challenge.type)} text-white`}>
+                        <div className="flex items-center gap-1">
+                          {getTypeIcon(challenge.type)}
+                          {challenge.type.charAt(0).toUpperCase() + challenge.type.slice(1)}
+                        </div>
+                      </Badge>
+                      <Badge 
+                        variant="outline" 
+                        className={`${
+                          challengeStatus === 'active' 
+                            ? 'text-green-400 border-green-400' 
+                            : challengeStatus === 'upcoming'
+                            ? 'text-blue-400 border-blue-400'
+                            : challengeStatus === 'completed'
+                            ? 'text-gray-400 border-gray-400'
+                            : 'text-gray-400 border-gray-400'
+                        }`}
+                      >
+                        {challengeStatus.charAt(0).toUpperCase() + challengeStatus.slice(1)}
+                      </Badge>
+                      {userHasJoined && (
+                        <Badge 
+                          variant="outline" 
+                          className="text-orange-400 border-orange-400"
+                        >
+                          <UserCheck className="h-3 w-3 mr-1" />
+                          Joined
+                        </Badge>
+                      )}
+                    </div>
+                    {challenge.price === 0 ? (
+                      <Badge variant="outline" className="text-green-400 border-green-400">
+                        Free
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-orange-400 border-orange-400">
+                        {formatCurrency(challenge.price)}
+                      </Badge>
+                    )}
+                  </div>
+                  <CardTitle className="text-white text-xl">{challenge.name}</CardTitle>
+                  <CardDescription className="text-gray-300">
+                    {challenge.description}
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  {/* Challenge Details */}
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Account Size:</span>
+                      <span className="text-white font-semibold">
+                        {formatCurrency(challenge.accountSize)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Participants:</span>
+                      <span className="text-white font-semibold">
+                        {challenge.currentParticipants}/{challenge.maxParticipants}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Duration:</span>
+                      <span className="text-white font-semibold">
+                        {formatDate(challenge.startDate)} - {formatDate(challenge.endDate)}
+                      </span>
+                    </div>
+                    
+                    {/* Challenge Countdown */}
+                    <ChallengeCountdown 
+                      startDate={challenge.startDate} 
+                      endDate={challenge.endDate} 
+                    />
+                    
+                    {challenge.challengeMode === 'target' ? (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Target Profit:</span>
+                        <span className="text-white font-semibold">
+                          {challenge.requirements.targetProfit}%
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Competition Mode:</span>
+                        <span className="text-white font-semibold">
+                          Rank Based
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Prizes */}
+                  {challenge.prizes.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+                        <Trophy className="h-4 w-4" />
+                        Prizes
+                      </h4>
+                      <div className="space-y-1">
+                        {challenge.prizes
+                          .sort((a, b) => {
+                            // Sort by rank order (individual ranks first, then bulk prizes)
+                            const aRank = a.rank || 0;
+                            const bRank = b.rank || 0;
+                            return aRank - bRank;
+                          })
+                          .slice(0, 3)
+                          .map((prize, index) => {
+                            // Check if it's a bulk prize
+                            const isBulk = prize.isBulk || (prize.rankStart && prize.rankEnd) || (prize.prize && /ranks?\s+\d+-\d+/i.test(prize.prize));
+                            
+                            if (isBulk) {
+                              // Extract rank range from description if not explicitly set
+                              const rankMatch = prize.prize?.match(/ranks?\s+(\d+)-(\d+)/i);
+                              const startRank = prize.rankStart || (rankMatch ? parseInt(rankMatch[1]) : prize.rank);
+                              const endRank = prize.rankEnd || (rankMatch ? parseInt(rankMatch[2]) : prize.rank);
+                              
+                              return (
+                                <div key={index} className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-400">
+                                    Ranks {startRank}-{endRank}:
+                                  </span>
+                                  <span className="text-white font-semibold">
+                                    {formatCurrency(prize.amount)}
+                                  </span>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={index} className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-400">
+                                    Rank #{prize.rank}:
+                                  </span>
+                                  <span className="text-white font-semibold">
+                                    {formatCurrency(prize.amount)}
+                                  </span>
+                                </div>
+                              );
+                            }
+                          })}
+                        {challenge.prizes.length > 3 && (
+                          <div className="text-xs text-gray-400">
+                            +{challenge.prizes.length - 3} more prizes
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Join Button */}
+                  {(() => {
+                    const buttonContent = getButtonContent(challenge, userHasJoined, challengeStatus);
+                    const paymentStatus = paymentStatuses[challenge._id];
+                    const isLoading = paymentStatus?.loading;
+                    
+                    return (
+                      <Button
+                        onClick={() => {
+                          if (userHasJoined) {
+                            handleViewChallenge(challenge._id);
+                          } else if (paymentStatus?.status === 'pending') {
+                            toast.info('Your payment is under verification. Please wait for admin approval.');
+                          } else if (paymentStatus?.status === 'verified') {
+                            navigate(`/challenges/${challenge._id}`);
+                          } else {
+                            handleJoinChallenge(challenge._id, challenge.price === 0, challengeStatus);
+                          }
+                        }}
+                        disabled={
+                          !userHasJoined && (
+                            challenge.currentParticipants >= challenge.maxParticipants || 
+                            challengeStatus === 'completed' || 
+                            challengeStatus === 'cancelled' ||
+                            isLoading
+                          )
+                        }
+                        className={`w-full ${buttonContent.className} text-white font-semibold`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {isLoading ? <Clock className="h-4 w-4 animate-spin" /> : buttonContent.icon}
+                          {isLoading ? 'Loading...' : buttonContent.text}
+                        </div>
+                      </Button>
+                    );
+                  })()}
+
+
+                  {/* Rules Button */}
+                  {challenge.rules && challenge.rules.length > 0 && (
+                    <Button
+                      onClick={() => handleShowRules(challenge)}
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-2 border-white/20 text-white hover:bg-white/10"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Rules
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+              );
+            })}
           </div>
         )}
-
-        {/* Challenges Grid - Only show when data is loaded */}
-        {getFilteredChallenges().length === 0 ? (
-              <div className="text-center py-12">
-                <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No challenges found</h3>
-                <p className="text-gray-300">Try adjusting your filter or check back later for new competitions</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getFilteredChallenges().map((challenge) => {
-                  const challengeStatus = getChallengeStatus(challenge.startDate, challenge.endDate, challenge.status);
-                  const userHasJoined = hasUserJoined(challenge._id);
-                  const buttonContent = getButtonContent(challenge, userHasJoined, challengeStatus);
-                  const paymentStatus = paymentStatuses[challenge._id];
-
-                  return (
-                    <Card key={challenge._id} className="bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer group">
-                      <CardHeader className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className={`p-2 rounded-lg ${getTypeColor(challenge.type)}`}>
-                              {getTypeIcon(challenge.type)}
-                            </div>
-                            <div>
-                              <CardTitle className="text-white text-lg group-hover:text-purple-300 transition-colors">{challenge.name}</CardTitle>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge className={`${getTypeColor(challenge.type)} text-white`}>
-                                  {challenge.type}
-                                </Badge>
-                                <Badge className={getStatusColor(challengeStatus)}>
-                                  {challengeStatus}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleShowRules(challenge)}
-                            className="text-gray-400 hover:text-white"
-                          >
-                            <FileText className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        
-                        <CardDescription className="text-gray-300 text-sm">
-                          {challenge.description}
-                        </CardDescription>
-                      </CardHeader>
-                      
-                      <CardContent className="p-6 pt-0">
-                        <div className="space-y-4">
-                          {/* Prize Information */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="text-center p-3 bg-white/5 rounded-lg">
-                              <div className="text-2xl font-bold text-white">
-                                {formatCurrency(challenge.accountSize)}
-                              </div>
-                              <div className="text-xs text-gray-400">Account Size</div>
-                            </div>
-                            <div className="text-center p-3 bg-white/5 rounded-lg">
-                              <div className="text-2xl font-bold text-white">
-                                {challenge.prizes.length > 0 ? formatCurrency(challenge.prizes[0].amount) : 'N/A'}
-                              </div>
-                              <div className="text-xs text-gray-400">Top Prize</div>
-                            </div>
-                          </div>
-
-                          {/* Challenge Details */}
-                          <div className="space-y-2 text-sm">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-400">Entry Fee:</span>
-                              <span className="text-white font-medium">
-                                {challenge.isFree ? 'Free' : formatCurrency(challenge.price)}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-400">Participants:</span>
-                              <span className="text-white font-medium">
-                                {challenge.currentParticipants}/{challenge.maxParticipants}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-400">Duration:</span>
-                              <span className="text-white font-medium">
-                                {formatDate(challenge.startDate)} - {formatDate(challenge.endDate)}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Payment Status */}
-                          {paymentStatus && paymentStatus.status !== 'none' && (
-                            <div className="text-center">
-                              <Badge className={getStatusColor(paymentStatus.status)}>
-                                Payment: {paymentStatus.status}
-                              </Badge>
-                            </div>
-                          )}
-
-                          {/* Action Button */}
-                          <Button
-                            onClick={() => {
-                              if (userHasJoined) {
-                                handleViewChallenge(challenge._id);
-                              } else {
-                                handleJoinChallenge(challenge._id, challenge.isFree, challengeStatus);
-                              }
-                            }}
-                            disabled={buttonContent.text === 'Challenge Full' || buttonContent.text === 'Not Available'}
-                            className={`w-full relative overflow-hidden group transition-all duration-300 ${buttonContent.className}`}
-                          >
-                            {/* Animated background effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-                            
-                            {/* Button content */}
-                            <div className="relative flex items-center justify-center">
-                              {buttonContent.icon}
-                              {buttonContent.text}
-                            </div>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
       </div>
 
       {/* Rules Popup Modal */}
       {showRules && selectedChallenge && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden shadow-2xl shadow-purple-500/20">
-            <div className="flex items-center justify-between p-6 border-b border-white/10">
-              <h3 className="text-white font-semibold text-xl flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-purple-500/20">
-                  <FileText className="h-5 w-5 text-purple-400" />
-                </div>
-                Tournament Rules
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-400" />
+                Challenge Rules
               </h3>
               <Button
                 onClick={handleCloseRules}
                 variant="ghost"
                 size="sm"
-                className="text-white hover:bg-white/10 hover:text-purple-300 transition-colors duration-300"
+                className="text-white hover:bg-white/10"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
-              <div className="space-y-4">
-                {selectedChallenge.rules.map((rule, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors duration-300">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 text-sm font-semibold">
-                      {index + 1}
-                    </div>
-                    <div className="text-gray-300 text-sm leading-relaxed">
-                      {rule}
-                    </div>
-                  </div>
-                ))}
+            <div className="p-4">
+              <div className="mb-3">
+                <h4 className="text-white font-medium mb-1">{selectedChallenge.name}</h4>
+                <p className="text-gray-400 text-sm">{selectedChallenge.description}</p>
               </div>
+              <div className="space-y-2">
+                <h5 className="text-white font-medium text-sm">Rules:</h5>
+                <ul className="space-y-2">
+                  {selectedChallenge.rules.map((rule, index) => (
+                    <li key={index} className="flex items-start gap-2 text-gray-300 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                      <span>{rule}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="p-4 border-t border-white/10">
+              <Button
+                onClick={handleCloseRules}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Close
+              </Button>
             </div>
           </div>
         </div>

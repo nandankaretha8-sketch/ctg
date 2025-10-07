@@ -524,17 +524,18 @@ const MentorshipDetails = () => {
               <CardContent className="p-4 sm:p-6 pt-0">
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center mx-auto mb-4">
-                    {settings?.mentorPhoto ? (
-                      <img
-                        src={settings.mentorPhoto}
-                        alt="Mentor"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-r from-purple-600 to-purple-900 flex items-center justify-center">
-                        <User className="h-8 w-8 text-white" />
-                      </div>
-                    )}
+                    <img
+                      src="/mentor-photo.JPEG"
+                      alt="Mentor"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-full h-full bg-gradient-to-r from-purple-600 to-purple-900 flex items-center justify-center" style={{ display: 'none' }}>
+                      <User className="h-8 w-8 text-white" />
+                    </div>
                   </div>
                   <h3 className="text-white font-semibold text-lg mb-2">
                     {plan.metadata.mentorName}
