@@ -70,7 +70,7 @@ const Header = () => {
                   WebkitTextFillColor: 'transparent'
                 }}
               >
-                {settings.siteName || "ctg academy"}
+                {settings.siteName || "CertifiedTradersGroup"}
               </span>
             </div>
           </div>
