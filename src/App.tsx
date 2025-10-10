@@ -9,6 +9,7 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import GlobalPageLoader from "@/components/GlobalPageLoader";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollToTop from "@/components/ScrollToTop";
 
 
 // Lazy load all pages for better performance
@@ -73,6 +74,7 @@ const App = () => (
       <SettingsProvider>
         <AuthProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <GlobalPageLoader />
             <Suspense fallback={
               <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">

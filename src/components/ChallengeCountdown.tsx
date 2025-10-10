@@ -124,41 +124,41 @@ const ChallengeCountdown: React.FC<ChallengeCountdownProps> = ({ startDate, endD
         <div className="text-gray-400 text-sm text-center">Starts in:</div>
         <div className="flex gap-2 justify-center items-center">
           {/* Days Box */}
-          <div className="bg-white/5 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
+          <div className="bg-gray-800/90 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
             <div className="text-white font-bold text-lg leading-none">
               {timeRemaining.days}
             </div>
-            <div className="text-gray-400 text-xs mt-1">
+            <div className="text-gray-300 text-xs mt-1">
               Days
             </div>
           </div>
           
           {/* Hours Box */}
-          <div className="bg-white/5 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
+          <div className="bg-gray-800/90 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
             <div className="text-white font-bold text-lg leading-none">
               {formatTimeValue(timeRemaining.hours)}
             </div>
-            <div className="text-gray-400 text-xs mt-1">
+            <div className="text-gray-300 text-xs mt-1">
               Hours
             </div>
           </div>
           
           {/* Minutes Box */}
-          <div className="bg-white/5 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
+          <div className="bg-gray-800/90 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
             <div className="text-white font-bold text-lg leading-none">
               {formatTimeValue(timeRemaining.minutes)}
             </div>
-            <div className="text-gray-400 text-xs mt-1">
+            <div className="text-gray-300 text-xs mt-1">
               Minutes
             </div>
           </div>
           
           {/* Seconds Box */}
-          <div className="bg-white/5 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
+          <div className="bg-gray-800/90 backdrop-blur-md border border-blue-500/30 rounded-lg px-3 py-2 min-w-[60px] text-center">
             <div className="text-white font-bold text-lg leading-none">
               {formatTimeValue(timeRemaining.seconds)}
             </div>
-            <div className="text-gray-400 text-xs mt-1">
+            <div className="text-gray-300 text-xs mt-1">
               Seconds
             </div>
           </div>

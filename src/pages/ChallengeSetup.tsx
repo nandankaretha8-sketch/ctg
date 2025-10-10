@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Shield, CheckCircle, AlertCircle, DollarSign, Users, Target, Trophy, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { toast } from 'sonner';
 import { authenticatedApiCall, publicApiCall } from '@/utils/apiHelpers';
 
@@ -43,6 +44,7 @@ interface Challenge {
 const ChallengeSetup = () => {
   const { id: challengeId } = useParams();
   const { user } = useAuth();
+  const { paymentStatus } = usePaymentStatus('challenge', challengeId || '');
   const navigate = useNavigate();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [loading, setLoading] = useState(true);
@@ -565,17 +567,32 @@ const ChallengeSetup = () => {
                   </div>
                 ) : userParticipation ? (
                   <div className="space-y-4">
-                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                      <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-blue-400" />
-                        <div>
-                          <h4 className="text-blue-400 font-semibold">Payment Complete</h4>
-                          <p className="text-gray-300 text-sm">
-                            Your payment has been processed successfully. Please complete your MT5 account setup below to join the competition.
-                          </p>
+                    {/* Only show "Payment Complete" if user has joined via payment and payment is verified */}
+                    {userParticipation.status === 'pending_setup' && challenge && !challenge.isFree && paymentStatus.status === 'verified' ? (
+                      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-blue-400" />
+                          <div>
+                            <h4 className="text-blue-400 font-semibold">Payment Complete</h4>
+                            <p className="text-gray-300 text-sm">
+                              Your payment has been processed successfully. Please complete your MT5 account setup below to join the competition.
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : userParticipation.status === 'pending_setup' && challenge && challenge.isFree ? (
+                      <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <div>
+                            <h4 className="text-green-400 font-semibold">Free Competition</h4>
+                            <p className="text-gray-300 text-sm">
+                              This is a free competition. Please complete your MT5 account setup below to join.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                     <Button
                       type="submit"
                       disabled={submitting}

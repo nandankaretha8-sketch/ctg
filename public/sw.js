@@ -83,9 +83,10 @@ self.addEventListener('fetch', (event) => {
         if (isDynamicImport) {
           return fetchWithRetry(event.request, 3).then((networkResponse) => {
             if (networkResponse && networkResponse.ok) {
-              // Update cache with new version
+              // Update cache with new version - clone before using response
+              const responseClone = networkResponse.clone();
               caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
-                cache.put(event.request, networkResponse.clone());
+                cache.put(event.request, responseClone);
               });
               return networkResponse;
             }
@@ -102,8 +103,9 @@ self.addEventListener('fetch', (event) => {
         return fetchWithRetry(event.request, 3).then((fetchResponse) => {
           if (fetchResponse && fetchResponse.ok) {
             const cacheToUse = isDynamicImport ? DYNAMIC_CACHE_NAME : CACHE_NAME;
+            const responseClone = fetchResponse.clone();
             caches.open(cacheToUse).then((cache) => {
-              cache.put(event.request, fetchResponse.clone());
+              cache.put(event.request, responseClone);
             });
           }
           return fetchResponse;

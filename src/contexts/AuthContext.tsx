@@ -106,11 +106,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               setIsLoading(false);
               setIsInitialized(true);
               return;
-            } else {
+            } else if (response.status === 401) {
+              // Token is invalid, remove it and continue to fallback
               localStorage.removeItem('token');
+            } else {
+              // Other error, continue to fallback
+              console.log('Auth check failed with status:', response.status);
             }
           } catch (timeoutError) {
             // Continue to fallback
+            console.log('Auth check timed out');
           }
         }
 
@@ -136,9 +141,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setIsLoading(false);
             setIsInitialized(true);
             return;
+          } else if (response.status === 401) {
+            console.log('Cookie authentication failed');
+          } else {
+            console.log('Cookie auth check failed with status:', response.status);
           }
         } catch (timeoutError) {
           // Cookie authentication timeout
+          console.log('Cookie auth check timed out');
         }
 
         // No valid authentication found

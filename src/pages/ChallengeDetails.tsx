@@ -29,7 +29,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { toast } from 'sonner';
-import { API_URL } from '@/lib/api';
+import { API_URL, authenticatedApiCall } from '@/lib/api';
 import ChallengeCountdown from '@/components/ChallengeCountdown';
 
 interface Challenge {
@@ -145,7 +145,8 @@ const ChallengeDetails = () => {
 
   const fetchChallengeDetails = async () => {
     try {
-      const response = await fetch(`${API_URL}/challenges/${challengeId}`, {
+      const response = await authenticatedApiCall(`/challenges/${challengeId}`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -154,12 +155,19 @@ const ChallengeDetails = () => {
       if (response.ok) {
         const data = await response.json();
         setChallenge(data.data || data.challenge);
+      } else if (response.status === 401) {
+        // Handle authentication failure gracefully
+        toast.error('Please login to view competition details');
+        navigate('/login');
+      } else if (response.status === 404) {
+        toast.error('Competition not found');
+        navigate('/challenges');
       } else {
         toast.error('Failed to fetch competition details');
         navigate('/challenges');
       }
     } catch (error) {
-      // Error handling:'Error fetching challenge:', error);
+      console.error('Error fetching challenge:', error);
       toast.error('Failed to fetch competition details');
       navigate('/challenges');
     }
@@ -167,7 +175,8 @@ const ChallengeDetails = () => {
 
   const fetchUserMT5Account = async () => {
     try {
-      const response = await fetch(`${API_URL}/challenges/${challengeId}/account`, {
+      const response = await authenticatedApiCall(`/challenges/${challengeId}/account`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -177,19 +186,25 @@ const ChallengeDetails = () => {
         const data = await response.json();
         setMt5Account(data.account);
         setUserParticipation(data.account);
+      } else if (response.status === 401) {
+        // Handle authentication failure - user might not be logged in
+        console.log('Authentication failed for MT5 account fetch');
+        setUserParticipation(null);
       } else {
         // User is not a participant, check if they have pending_setup status
         setUserParticipation(null);
       }
     } catch (error) {
-      // Error handling:'Error fetching MT5 account:', error);
+      // Error handling for optional data
+      console.log('Error fetching MT5 account:', error);
       setUserParticipation(null);
     }
   };
 
   const fetchLeaderboard = async () => {
     try {
-      const response = await fetch(`${API_URL}/leaderboard?challengeId=${challengeId}`, {
+      const response = await authenticatedApiCall(`/leaderboard?challengeId=${challengeId}`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -207,9 +222,13 @@ const ChallengeDetails = () => {
             setUserRank(rank);
           }
         }
+      } else if (response.status === 401) {
+        // Handle authentication failure for leaderboard
+        console.log('Authentication failed for leaderboard fetch');
       }
     } catch (error) {
-      // Error handling:'Error fetching leaderboard:', error);
+      // Error handling for leaderboard data
+      console.log('Error fetching leaderboard:', error);
     } finally {
       setLoading(false);
     }
@@ -305,12 +324,13 @@ const ChallengeDetails = () => {
 
   // Show MT5 setup form when:
   // - user hasn't joined yet (no account fetched), or
-  // - user is joined but pending_setup / pending_payment and no MT5 set
+  // - user is joined but pending_setup and no MT5 set, AND payment is verified
   const hasPendingSetup = (
     !mt5Account ||
     (userParticipation &&
-      (userParticipation.status === 'pending_setup' || userParticipation.status === 'pending_payment') &&
-      !userParticipation.accountId)
+      userParticipation.status === 'pending_setup' &&
+      !userParticipation.accountId &&
+      paymentStatus.status === 'verified')
   );
 
   const handleJoinChallenge = () => {
@@ -882,17 +902,19 @@ const ChallengeDetails = () => {
             <CardContent className="p-4 sm:p-6 pt-0">
               {hasPendingSetup ? (
                 <div className="space-y-6">
-                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-blue-400" />
-                      <div>
-                        <h4 className="text-blue-400 font-semibold">Payment Complete</h4>
-                        <p className="text-gray-300 text-sm">
-                          Your payment has been processed successfully. Please complete your MT5 account setup below to join the competition.
-                        </p>
+                  {paymentStatus.status === 'verified' && (
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-blue-400" />
+                        <div>
+                          <h4 className="text-blue-400 font-semibold">Payment Complete</h4>
+                          <p className="text-gray-300 text-sm">
+                            Your payment has been processed successfully. Please complete your MT5 account setup below to join the competition.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   <form onSubmit={handleMT5Setup} className="space-y-6">
                     <div className="space-y-2">
