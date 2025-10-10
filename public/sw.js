@@ -1,4 +1,12 @@
 // Service Worker for caching and push notifications
+
+// Disable console logs in service worker
+console.log = () => {};
+console.warn = () => {};
+console.error = () => {};
+console.info = () => {};
+console.debug = () => {};
+
 const CACHE_VERSION = 'v2';
 const CACHE_NAME = `ctg-app-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `ctg-dynamic-${CACHE_VERSION}`;
